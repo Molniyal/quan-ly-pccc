@@ -344,7 +344,12 @@
 
         <div class="section-card">
             <label class="section-title">👤 Nhân Viên Kiểm Tra</label>
-            <input type="text" id="maNV" placeholder="Nhập mã nhân viên..." style="text-transform: uppercase;">
+            <input type="text" id="maNV" placeholder="NHẬP MÃ NV (Vd: NV001)..." style="text-transform: uppercase;"
+                oninput="lookupEmployee()">
+            <div id="tenNV_Display"
+                style="margin-top: 10px; font-weight: 700; color: var(--success); font-size: 15px; display: none; text-align: center; background: rgba(0, 230, 118, 0.1); padding: 8px; border-radius: 10px;">
+                👤 Nhân viên: <span id="tenNV_Text"></span>
+            </div>
         </div>
 
         <div class="section-card">
@@ -407,7 +412,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyikYnrGnGYO02UAqEbUXl-y6GMyk2qdNPFGNG1Czi7s7fVr7o2y1OIf4bQHRj-PLk9/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysyAe7CYJvHynsh7MgahRuN_woabtD-ZRmzGnPf4cNx5GBJErf6yS3-vACTXnF3alJ/exec";
         const CLOUD_NAME = "dlajbw9jc";
         const UPLOAD_PRESET = "pccc_anh";
 
@@ -416,12 +421,47 @@
             const idThietBi = urlParams.get('id');
 
             if (idThietBi) {
-                document.getElementById('maTB_Badge').innerText = idThietBi;
-                document.getElementById('maTB').value = idThietBi;
+                document.getElementById('maTB_Badge').innerText = idThietBi.toUpperCase();
+                document.getElementById('maTB').value = idThietBi.toUpperCase();
             }
 
             const savedNV = localStorage.getItem('savedMaNV');
-            if (savedNV) document.getElementById('maNV').value = savedNV;
+            if (savedNV) {
+                document.getElementById('maNV').value = savedNV;
+                lookupEmployee();
+            }
+        }
+
+        // Tự động tìm tên nhân viên
+        let lookupTimeout;
+        async function lookupEmployee() {
+            clearTimeout(lookupTimeout);
+            const maNV = document.getElementById('maNV').value.trim().toUpperCase();
+            const display = document.getElementById('tenNV_Display');
+            const text = document.getElementById('tenNV_Text');
+
+            if (maNV.length < 3) {
+                display.style.display = "none";
+                return;
+            }
+
+            lookupTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(SCRIPT_URL + "?action=getEmployee&maNV=" + maNV);
+                    const data = await res.json();
+                    if (data.status === "success") {
+                        text.innerText = data.name;
+                        display.style.display = "block";
+                        display.style.background = "rgba(0, 230, 118, 0.1)";
+                        display.style.color = "var(--success)";
+                    } else {
+                        text.innerText = "Không tìm thấy nhân viên";
+                        display.style.display = "block";
+                        display.style.background = "rgba(255, 23, 68, 0.1)";
+                        display.style.color = "var(--danger)";
+                    }
+                } catch (e) { console.log("Lookup error:", e); }
+            }, 800);
         }
 
         function showLoading(text) {
@@ -455,7 +495,7 @@
 
         async function submitData() {
             const maTB = document.getElementById('maTB').value.trim();
-            const maNV = document.getElementById('maNV').value.trim();
+            const maNV = document.getElementById('maNV').value.trim().toUpperCase();
             const nq = document.querySelector('input[name="ngoaiQuan"]:checked').value;
             const as = document.querySelector('input[name="apSuat"]:checked').value;
             const hsd = document.querySelector('input[name="hanSD"]:checked').value;
@@ -463,92 +503,79 @@
             const fileInput = document.getElementById('anhChup');
 
             if (!maTB) return alert("Hệ thống chưa nhận diện được mã vị trí.");
-            if (!maNV) return alert("Vui lòng nhập Mã Nhân Viên của bạn.");
-            if (fileInput.files.length === 0) return alert("Vui lòng chụp ảnh hiện trường để gửi báo cáo.");
-
-            if (!confirm("Xác nhận thông tin chính xác và gửi báo cáo?")) return;
+            if (!maNV) return alert("Vui lòng nhập Mã Nhân Viên.");
+            if (fileInput.files.length === 0) return alert("Vui lòng chụp ảnh hiện trường.");
 
             document.getElementById('btnSubmit').disabled = true;
+            showLoading("Đang xác thực dữ liệu...");
 
-            // --- BƯỚC 1: KIỂM TRA TRÙNG LẶP (ĐÃ TỐI ƯU TẠI ĐÂY) ---
-            showLoading("Đang xác thực trạng thái vị trí...");
             try {
+                // 1. Kiểm tra trùng lặp
                 const checkRes = await fetch(SCRIPT_URL + "?maTB=" + maTB);
                 const checkData = await checkRes.json();
 
                 if (checkData.status === "inspected") {
                     hideLoading();
-                    alert("⚠️ KHÔNG THỂ GỬI:\n" + checkData.message);
-                    document.getElementById('warning-duplicate').style.display = "block";
-                    document.getElementById('warning-duplicate').innerText = "⚠️ " + checkData.message;
-                    document.getElementById('btnSubmit').disabled = false; // Re-enable button on duplicate
-                    return; // Dừng lại không cho gửi nữa
-                }
-            } catch (error) {
-                console.log("Network status check bypassed due to error.");
-                // If network check fails, we might still want to proceed or alert.
-                // For now, we'll just log and proceed, assuming the main submission will catch network issues.
-            }
-
-            // --- BƯỚC 2: XỬ LÝ ẢNH VÀ TẢI LÊN ---
-            showLoading("Đang tối ưu và tải ảnh lên...");
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-
-            reader.onload = function (e) {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = async function () {
-                    const canvas = document.createElement('canvas');
-                    const scale = Math.min(1000 / img.width, 1);
-                    canvas.width = img.width * scale; canvas.height = img.height * scale;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                    try {
-                        const formData = new FormData();
-                        formData.append("file", canvas.toDataURL("image/jpeg", 0.8));
-                        formData.append("upload_preset", UPLOAD_PRESET);
-
-                        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
-                        const cloudData = await cloudRes.json();
-
-                        showLoading("Đang ghi báo cáo vào hệ thống...");
-                        const payload = { maNV, maTB, ngoaiQuan: nq, apSuat: as, hanSD: hsd, ghiChu, linkAnh: cloudData.secure_url };
-                        const sheetRes = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                        const sheetData = await sheetRes.json();
-
-                        if (sheetData.status === 'success') {
-                            localStorage.setItem('savedMaNV', maNV);
-                            // Thay đổi nội dung thông báo thành công
-                            alert(`✅ XÁC NHẬN THÀNH CÔNG!\nCảm ơn ${sheetData.name}. Hệ thống sẵn sàng cho vị trí tiếp theo.`);
-
-                            // Chế độ Quét liên tục: Xóa mã TB hiện tại và mời quét mã mới
-                            document.getElementById('maTB_Badge').innerText = "VỊ TRÍ ĐÃ LƯU - ĐANG CHỜ QUÉT MÃ MỚI...";
-                            document.getElementById('maTB').value = "";
-                            document.getElementById('previewBox').style.display = "none";
-                            document.getElementById('label-upload').style.display = "flex";
-                            document.getElementById('anhChup').value = "";
-                            document.getElementById('ghiChu').value = "";
-
-                            // Nếu dùng ứng dụng quét ngoài, có thể yêu cầu đóng trình duyệt hoặc điều hướng
-                            if (confirm("Báo cáo đã lưu! Bạn có muốn đóng trình duyệt để quét mã tiếp theo không?")) {
-                                window.close(); // Chỉ hoạt động nếu trình duyệt cho phép
-                            }
-                        } else {
-                            alert("❌ Lỗi: " + sheetData.message);
-                            document.getElementById('btnSubmit').disabled = false;
-                        }
+                    const reSubmit = confirm(`⚠️ CẢNH BÁO:\n${checkData.message}\n\nBạn có chắc chắn muốn nộp lại báo cáo mới cho vị trí này không?`);
+                    if (!reSubmit) {
+                        document.getElementById('btnSubmit').disabled = false;
+                        return;
                     }
-                    } catch (error) {
-                    alert("⚠️ Lỗi kết nối! Vui lòng kiểm tra mạng.");
-                    document.getElementById('btnSubmit').disabled = false;
+                    showLoading("Tiếp tục xử lý báo cáo nộp lại...");
                 }
-                finally { hideLoading(); }
-            }
-        }
+
+                // 2. Xử lý ảnh
+                showLoading("Đang tối ưu hình ảnh...");
+                const file = fileInput.files[0];
+                const base64 = await new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const scale = Math.min(1000 / img.width, 1);
+                            canvas.width = img.width * scale; canvas.height = img.height * scale;
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            resolve(canvas.toDataURL("image/jpeg", 0.8));
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // 3. Tải lên Cloudinary
+                showLoading("Đang lưu trữ hình ảnh...");
+                const formData = new FormData();
+                formData.append("file", base64);
+                formData.append("upload_preset", UPLOAD_PRESET);
+                const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const cloudData = await cloudRes.json();
+
+                // 4. Ghi vào Google Sheets
+                showLoading("Đang hoàn tất báo cáo...");
+                const payload = { maNV, maTB, ngoaiQuan: nq, apSuat: as, hanSD: hsd, ghiChu, linkAnh: cloudData.secure_url };
+                const sheetRes = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const sheetData = await sheetRes.json();
+
+                if (sheetData.status === 'success') {
+                    localStorage.setItem('savedMaNV', maNV);
+                    alert(`✅ THÀNH CÔNG!\nCảm ơn ${sheetData.name}. Hệ thống đã ghi nhận báo cáo.`);
+
+                    // Reset cho lần quét tiếp theo
+                    document.getElementById('maTB_Badge').innerText = "ĐANG CHỜ QUÉT MÃ MỚI...";
+                    document.getElementById('maTB').value = "";
+                    document.getElementById('previewBox').style.display = "none";
+                    document.getElementById('label-upload').style.display = "flex";
+                    document.getElementById('anhChup').value = "";
+                    document.getElementById('ghiChu').value = "";
+                    if (confirm("Bạn có muốn thoát trình duyệt để quét vị trí tiếp theo?")) window.close();
+                } else { alert("❌ Lỗi: " + sheetData.message); }
+
+            } catch (error) { alert("⚠️ Lỗi mạng! Kiểm tra kết nối."); console.error("Submit error:", error); }
+            finally { hideLoading(); document.getElementById('btnSubmit').disabled = false; }
         }
     </script>
 </body>
 
 </html>
+```
