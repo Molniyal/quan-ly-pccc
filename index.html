@@ -338,7 +338,14 @@
 
         <div class="section-card">
             <label class="section-title">📍 Mã Vị Trí / Thiết Bị</label>
-            <div id="maTB_Badge" class="id-badge">WAITING QR...</div>
+            <div style="display: flex; gap: 10px; align-items: stretch;">
+                <div id="maTB_Badge" class="id-badge" style="flex: 1;">WAITING QR...</div>
+                <button onclick="requestScanner()"
+                    style="background: var(--primary); border: none; border-radius: 12px; padding: 0 15px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center;"
+                    title="Quét mã mới">
+                    <span style="font-size: 20px;">📷</span>
+                </button>
+            </div>
             <input type="hidden" id="maTB">
         </div>
 
@@ -349,6 +356,11 @@
             <div id="tenNV_Display"
                 style="margin-top: 10px; font-weight: 700; color: var(--success); font-size: 15px; display: none; text-align: center; background: rgba(0, 230, 118, 0.1); padding: 8px; border-radius: 10px;">
                 👤 Nhân viên: <span id="tenNV_Text"></span>
+            </div>
+            <div id="adminLink" style="display: none; margin-top: 10px; text-align: center;">
+                <a href="Admin.html"
+                    style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px;">⚙️ TRANG
+                    QUẢN TRỊ (ADMIN ONLY)</a>
             </div>
         </div>
 
@@ -432,6 +444,15 @@
             }
         }
 
+        // Kích hoạt trình quét mã (Dùng cho thiết bị di động)
+        function requestScanner() {
+            // Nếu bạn dùng ứng dụng web để quét, có thể dùng thư viện. 
+            // Ở đây giải pháp đơn giản nhất là reload về URL gốc để người dùng quét lại từ ứng dụng quét QR mặc định.
+            if (confirm("Hệ thống sẽ mở lại để bạn quét mã QR mới. Tiếp tục?")) {
+                window.location.href = window.location.pathname;
+            }
+        }
+
         // Tự động tìm tên nhân viên
         let lookupTimeout;
         async function lookupEmployee() {
@@ -442,6 +463,7 @@
 
             if (maNV.length < 3) {
                 display.style.display = "none";
+                document.getElementById('adminLink').style.display = "none";
                 return;
             }
 
@@ -450,15 +472,22 @@
                     const res = await fetch(SCRIPT_URL + "?action=getEmployee&maNV=" + maNV);
                     const data = await res.json();
                     if (data.status === "success") {
-                        text.innerText = data.name;
+                        text.innerText = data.name + " (" + (data.role || "User") + ")";
                         display.style.display = "block";
                         display.style.background = "rgba(0, 230, 118, 0.1)";
                         display.style.color = "var(--success)";
+
+                        if (data.role && data.role.toUpperCase() === "ADMIN") {
+                            document.getElementById('adminLink').style.display = "block";
+                        } else {
+                            document.getElementById('adminLink').style.display = "none";
+                        }
                     } else {
                         text.innerText = "Không tìm thấy nhân viên";
                         display.style.display = "block";
                         display.style.background = "rgba(255, 23, 68, 0.1)";
                         display.style.color = "var(--danger)";
+                        document.getElementById('adminLink').style.display = "none";
                     }
                 } catch (e) { console.log("Lookup error:", e); }
             }, 800);
