@@ -411,26 +411,13 @@
         const CLOUD_NAME = "dlajbw9jc";
         const UPLOAD_PRESET = "pccc_anh";
 
-        window.onload = async function () {
+        window.onload = function () {
             const urlParams = new URLSearchParams(window.location.search);
             const idThietBi = urlParams.get('id');
 
             if (idThietBi) {
                 document.getElementById('maTB_Badge').innerText = idThietBi;
                 document.getElementById('maTB').value = idThietBi;
-
-                showLoading("Dữ liệu vị trí đang được kiểm tra...");
-                try {
-                    const res = await fetch(SCRIPT_URL + "?maTB=" + idThietBi);
-                    const data = await res.json();
-
-                    if (data.status === "inspected") {
-                        document.getElementById('warning-duplicate').style.display = "block";
-                        document.getElementById('warning-duplicate').innerText = "⚠️ " + data.message;
-                        document.getElementById('btnSubmit').disabled = true;
-                    }
-                } catch (error) { console.log("Network status check bypassed."); }
-                hideLoading();
             }
 
             const savedNV = localStorage.getItem('savedMaNV');
@@ -482,8 +469,29 @@
             if (!confirm("Xác nhận thông tin chính xác và gửi báo cáo?")) return;
 
             document.getElementById('btnSubmit').disabled = true;
-            showLoading("Đang tối ưu và tải ảnh lên...");
 
+            // --- BƯỚC 1: KIỂM TRA TRÙNG LẶP (ĐÃ TỐI ƯU TẠI ĐÂY) ---
+            showLoading("Đang xác thực trạng thái vị trí...");
+            try {
+                const checkRes = await fetch(SCRIPT_URL + "?maTB=" + maTB);
+                const checkData = await checkRes.json();
+
+                if (checkData.status === "inspected") {
+                    hideLoading();
+                    alert("⚠️ KHÔNG THỂ GỬI:\n" + checkData.message);
+                    document.getElementById('warning-duplicate').style.display = "block";
+                    document.getElementById('warning-duplicate').innerText = "⚠️ " + checkData.message;
+                    document.getElementById('btnSubmit').disabled = false; // Re-enable button on duplicate
+                    return; // Dừng lại không cho gửi nữa
+                }
+            } catch (error) {
+                console.log("Network status check bypassed due to error.");
+                // If network check fails, we might still want to proceed or alert.
+                // For now, we'll just log and proceed, assuming the main submission will catch network issues.
+            }
+
+            // --- BƯỚC 2: XỬ LÝ ẢNH VÀ TẢI LÊN ---
+            showLoading("Đang tối ưu và tải ảnh lên...");
             const file = fileInput.files[0];
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -512,13 +520,33 @@
 
                         if (sheetData.status === 'success') {
                             localStorage.setItem('savedMaNV', maNV);
-                            alert(`✅ XÁC NHẬN THÀNH CÔNG!\nCảm ơn ${sheetData.name}.`);
-                            location.reload();
-                        } else { alert("❌ Lỗi: " + sheetData.message); }
-                    } catch (error) { alert("⚠️ Lỗi kết nối! Vui lòng kiểm tra mạng."); }
-                    finally { document.getElementById('btnSubmit').disabled = false; hideLoading(); }
+                            // Thay đổi nội dung thông báo thành công
+                            alert(`✅ XÁC NHẬN THÀNH CÔNG!\nCảm ơn ${sheetData.name}. Hệ thống sẵn sàng cho vị trí tiếp theo.`);
+
+                            // Chế độ Quét liên tục: Xóa mã TB hiện tại và mời quét mã mới
+                            document.getElementById('maTB_Badge').innerText = "VỊ TRÍ ĐÃ LƯU - ĐANG CHỜ QUÉT MÃ MỚI...";
+                            document.getElementById('maTB').value = "";
+                            document.getElementById('previewBox').style.display = "none";
+                            document.getElementById('label-upload').style.display = "flex";
+                            document.getElementById('anhChup').value = "";
+                            document.getElementById('ghiChu').value = "";
+
+                            // Nếu dùng ứng dụng quét ngoài, có thể yêu cầu đóng trình duyệt hoặc điều hướng
+                            if (confirm("Báo cáo đã lưu! Bạn có muốn đóng trình duyệt để quét mã tiếp theo không?")) {
+                                window.close(); // Chỉ hoạt động nếu trình duyệt cho phép
+                            }
+                        } else {
+                            alert("❌ Lỗi: " + sheetData.message);
+                            document.getElementById('btnSubmit').disabled = false;
+                        }
+                    }
+                    } catch (error) {
+                    alert("⚠️ Lỗi kết nối! Vui lòng kiểm tra mạng.");
+                    document.getElementById('btnSubmit').disabled = false;
                 }
+                finally { hideLoading(); }
             }
+        }
         }
     </script>
 </body>
