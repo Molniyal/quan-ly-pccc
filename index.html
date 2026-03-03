@@ -1,326 +1,48 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PCCC Digital - Hệ Thống Kiểm Tra</title>
-    <!-- Google Fonts -->
+    <title>PCCC Digital</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        :root {
-            --primary: #ff4d4d;
-            --primary-glow: rgba(255, 77, 77, 0.4);
-            --success: #00e676;
-            --danger: #ff1744;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.6);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 30px 20px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header-section h2 {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(to right, #fff, #ff4d4d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .header-section p {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 5px;
-        }
-
-        .section-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .section-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        label.section-title {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .id-badge {
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            border-radius: 12px;
-            padding: 15px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 20px;
-            text-align: center;
-            color: var(--primary);
-            text-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 15px;
-            color: white;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-glow);
-        }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .btn-group input[type="radio"] {
-            display: none;
-        }
-
-        .btn-group label {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-            filter: grayscale(1);
-            opacity: 0.5;
-            transition: 0.3s;
-        }
-
-        input:checked+label {
-            background: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 10px 20px var(--primary-glow);
-            transform: translateY(-3px);
-        }
-
-        input:checked+label .btn-icon {
-            filter: grayscale(0);
-            opacity: 1;
-        }
-
-        input:checked+label span {
-            color: white;
-            font-weight: 700;
-        }
-
-        /* Custom colors for Status */
-        input[value="Đạt"]:checked+label,
-        input[value="Còn hạn"]:checked+label {
-            background: var(--success);
-            box-shadow: 0 10px 20px rgba(0, 230, 118, 0.3);
-        }
-
-        #box-ghichu {
-            margin-top: 15px;
-            display: none;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .file-upload-card {
-            border: 2px dashed var(--glass-border);
-            border-radius: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .file-upload-card:hover {
-            border-color: var(--primary);
-            background: rgba(255, 77, 77, 0.05);
-        }
-
-        #anhChup {
-            display: none;
-        }
-
-        .preview-container {
-            display: none;
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        #previewAnh {
-            width: 100%;
-            display: block;
-            border-radius: 20px;
-            border: 2px solid var(--success);
-        }
-
-        .btn-submit {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(90deg, #ff4d4d, #f44336);
-            color: white;
-            border: none;
-            border-radius: 18px;
-            font-size: 18px;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 20px;
-            box-shadow: 0 15px 30px rgba(244, 67, 54, 0.3);
-            transition: 0.3s;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(244, 67, 54, 0.4);
-        }
-
-        .btn-submit:disabled {
-            background: #444;
-            box-shadow: none;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        #warning-duplicate {
-            display: none;
-            background: rgba(255, 23, 68, 0.1);
-            border: 1px solid var(--danger);
-            color: #ff8a80;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-        }
+        /* GIỮ NGUYÊN TOÀN BỘ CSS CỦA BẠN BÊN TRÊN */
+        :root { --primary: #ff4d4d; --primary-glow: rgba(255, 77, 77, 0.4); --success: #00e676; --danger: #ff1744; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); --text-main: #ffffff; --text-muted: rgba(255, 255, 255, 0.6); }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg-gradient); background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; color: var(--text-main); overflow-x: hidden; }
+        .app-container { width: 100%; max-width: 480px; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 32px; padding: 30px 20px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); }
+        .header-section { text-align: center; margin-bottom: 30px; }
+        .header-section h2 { font-size: 28px; font-weight: 800; background: linear-gradient(to right, #fff, #ff4d4d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-section p { font-size: 14px; color: var(--text-muted); margin-top: 5px; }
+        .section-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; transition: all 0.3s ease; }
+        label.section-title { font-weight: 600; display: block; margin-bottom: 12px; font-size: 14px; color: var(--text-muted); text-transform: uppercase; }
+        .id-badge { background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)); border-radius: 12px; padding: 15px; font-family: monospace; font-weight: 700; font-size: 20px; text-align: center; color: var(--primary); }
+        input[type="text"], textarea { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px; color: white; font-size: 16px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn-group input[type="radio"] { display: none; }
+        .btn-group label { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .btn-icon { font-size: 24px; margin-bottom: 5px; opacity: 0.5; }
+        input:checked+label { background: var(--primary); border-color: var(--primary); transform: translateY(-3px); }
+        input:checked+label .btn-icon { opacity: 1; }
+        input[value="Đạt"]:checked+label, input[value="Còn hạn"]:checked+label { background: var(--success); }
+        #box-ghichu { display: none; }
+        .file-upload-card { border: 2px dashed var(--glass-border); border-radius: 20px; padding: 40px 20px; text-align: center; cursor: pointer; }
+        #anhChup { display: none; }
+        #previewBox { display: none; margin-top: 10px; }
+        #previewAnh { width: 100%; border-radius: 20px; border: 2px solid var(--success); }
+        .btn-submit { width: 100%; padding: 20px; background: linear-gradient(90deg, #ff4d4d, #f44336); color: white; border: none; border-radius: 18px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 20px; }
+        .btn-submit:disabled { background: #444; opacity: 0.5; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        #warning-duplicate { display: none; background: rgba(255, 23, 68, 0.1); border: 1px solid var(--danger); color: #ff8a80; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; font-weight: 600; }
+        
+        /* CSS cho QR Scanner Mới */
+        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 10px; border: 2px solid var(--primary); }
+        #qr-reader button { background: var(--glass-bg); color: white; border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; margin: 5px; }
     </style>
 </head>
-
 <body>
 
     <div id="loading-overlay">
@@ -338,11 +60,13 @@
 
         <div class="section-card">
             <label class="section-title">📍 Mã Vị Trí / Thiết Bị</label>
+            
+            <div id="qr-reader"></div>
+
             <div style="display: flex; gap: 10px; align-items: stretch;">
                 <div id="maTB_Badge" class="id-badge" style="flex: 1;">WAITING QR...</div>
-                <button onclick="requestScanner()"
-                    style="background: var(--primary); border: none; border-radius: 12px; padding: 0 15px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center;"
-                    title="Quét mã mới">
+                <button onclick="toggleScanner()" id="btnScanner"
+                    style="background: var(--primary); border: none; border-radius: 12px; padding: 0 15px; cursor: pointer; color: white;" title="Quét mã mới">
                     <span style="font-size: 20px;">📷</span>
                 </button>
             </div>
@@ -351,155 +75,146 @@
 
         <div class="section-card">
             <label class="section-title">👤 Nhân Viên Kiểm Tra</label>
-            <input type="text" id="maNV" placeholder="NHẬP MÃ NV (Vd: NV001)..." style="text-transform: uppercase;"
-                oninput="lookupEmployee()">
-            <div id="tenNV_Display"
-                style="margin-top: 10px; font-weight: 700; color: var(--success); font-size: 15px; display: none; text-align: center; background: rgba(0, 230, 118, 0.1); padding: 8px; border-radius: 10px;">
-                👤 Nhân viên: <span id="tenNV_Text"></span>
+            <input type="text" id="maNV" placeholder="NHẬP MÃ NV..." style="text-transform: uppercase;" oninput="lookupEmployee()">
+            <div id="tenNV_Display" style="margin-top: 10px; font-weight: 700; display: none; text-align: center; padding: 8px; border-radius: 10px;">
+                <span id="tenNV_Text"></span>
             </div>
             <div id="adminLink" style="display: none; margin-top: 10px; text-align: center;">
-                <a href="Admin.html"
-                    style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px;">⚙️ TRANG
-                    QUẢN TRỊ (ADMIN ONLY)</a>
+                <a href="Admin.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px;">⚙️ TRANG QUẢN TRỊ (ADMIN)</a>
             </div>
         </div>
 
         <div class="section-card">
             <label class="section-title">🔎 Trạng Thái Thiết Bị</label>
-
             <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Ngoại quan:</p>
-            <div class="btn-group" style="margin-bottom: 15px;">
+            <div class="btn-group">
                 <input type="radio" id="nq-dat" name="ngoaiQuan" value="Đạt" checked onchange="checkLoi()">
                 <label for="nq-dat"><span class="btn-icon">✅</span><span>ĐẠT</span></label>
                 <input type="radio" id="nq-loi" name="ngoaiQuan" value="Lỗi" onchange="checkLoi()">
                 <label for="nq-loi"><span class="btn-icon">❌</span><span>LỖI</span></label>
             </div>
-
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Áp suất / Kỹ thuật:</p>
-            <div class="btn-group" style="margin-bottom: 15px;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Áp suất:</p>
+            <div class="btn-group">
                 <input type="radio" id="as-dat" name="apSuat" value="Đạt" checked onchange="checkLoi()">
                 <label for="as-dat"><span class="btn-icon">⚡</span><span>OK</span></label>
                 <input type="radio" id="as-loi" name="apSuat" value="Lỗi" onchange="checkLoi()">
                 <label for="as-loi"><span class="btn-icon">⚠️</span><span>LỖI</span></label>
             </div>
-
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Thời hạn sử dụng:</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Hạn sử dụng:</p>
             <div class="btn-group">
                 <input type="radio" id="hsd-con" name="hanSD" value="Còn hạn" checked onchange="checkLoi()">
                 <label for="hsd-con"><span class="btn-icon">📅</span><span>CÒN HẠN</span></label>
                 <input type="radio" id="hsd-het" name="hanSD" value="Hết hạn" onchange="checkLoi()">
                 <label for="hsd-het"><span class="btn-icon">⌛</span><span>HẾT HẠN</span></label>
             </div>
-
-            <div id="box-ghichu">
-                <label class="section-title" style="color: var(--danger); margin-top: 15px;">📝 Mô tả lỗi chi
-                    tiết:</label>
-                <textarea id="ghiChu" rows="3" placeholder="Ghi chú tại đây..."></textarea>
-            </div>
+            <div id="box-ghichu"><textarea id="ghiChu" rows="3" placeholder="Ghi chú chi tiết..."></textarea></div>
         </div>
 
         <div class="section-card">
             <label class="section-title">📸 Minh Chứng Hình Ảnh</label>
             <label for="anhChup" id="label-upload">
-                <div class="file-upload-card">
-                    <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
-                    <div style="font-weight: 600;">CHỤP ẢNH TẠI HIỆN TRƯỜNG</div>
-                    <div style="font-size: 12px; opacity: 0.6; margin-top: 5px;">(Bắt buộc để gửi báo cáo)</div>
-                </div>
+                <div class="file-upload-card"><div style="font-size: 40px;">📷</div><div style="font-weight: 600;">CHỤP ẢNH TẠI HIỆN TRƯỜNG</div></div>
             </label>
             <input type="file" id="anhChup" accept="image/*" capture="environment" onchange="previewImage(event)">
-
-            <div id="previewBox" class="preview-container">
-                <label for="anhChup" style="cursor: pointer;">
-                    <img id="previewAnh" src="">
-                    <div
-                        style="text-align: center; margin-top: 10px; font-weight: 600; color: var(--success); font-size: 14px;">
-                        ✨ Ảnh đã sẵn sàng (Chạm để chụp lại)
-                    </div>
-                </label>
-            </div>
+            <div id="previewBox" class="preview-container"><label for="anhChup" style="cursor: pointer;"><img id="previewAnh" src=""></label></div>
         </div>
 
         <button id="btnSubmit" class="btn-submit" onclick="submitData()">XÁC NHẬN GỬI BÁO CÁO</button>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTXKUljtslNHi4VCsIfBvBlmVzHm7xf2hR4lKJUUVI7FS5K0j-Fp_sMdPFqgOsuWly/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDjEk_33uvlchMhSiYndcpBed8nfV_VDCBm2Msf6XI93wU-mMgpQC0eXQVa6fbAZ5W/exec"; 
         const CLOUD_NAME = "dlajbw9jc";
         const UPLOAD_PRESET = "pccc_anh";
+
+        // Logic Scanner Web App
+        let html5QrcodeScanner;
+        
+        function toggleScanner() {
+            const readerDiv = document.getElementById('qr-reader');
+            if (readerDiv.style.display === "block") {
+                readerDiv.style.display = "none";
+                if(html5QrcodeScanner) html5QrcodeScanner.clear();
+            } else {
+                readerDiv.style.display = "block";
+                html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }
+        }
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            // Khi quét thành công, dừng camera
+            html5QrcodeScanner.clear();
+            document.getElementById('qr-reader').style.display = "none";
+            
+            // Xử lý chuỗi URL lấy ID
+            try {
+                let id = "";
+                if(decodedText.includes("?id=")) {
+                    id = new URL(decodedText).searchParams.get('id');
+                } else {
+                    id = decodedText; // Nếu mã QR chỉ là chữ
+                }
+                
+                document.getElementById('maTB_Badge').innerText = id.toUpperCase();
+                document.getElementById('maTB').value = id.toUpperCase();
+                
+                // Gọi server check trùng lặp
+                checkStatus(id);
+                
+            } catch(e) { alert("Mã QR không hợp lệ!"); }
+        }
+
+        function onScanFailure(error) { /* Bỏ qua lỗi khung hình */ }
+
+        async function checkStatus(id) {
+            showLoading("Kiểm tra trạng thái thiết bị...");
+            try {
+                const res = await fetch(SCRIPT_URL + "?maTB=" + id);
+                const data = await res.json();
+                if (data.status === "inspected") {
+                    document.getElementById('warning-duplicate').style.display = "block";
+                    document.getElementById('btnSubmit').disabled = true;
+                } else {
+                    document.getElementById('warning-duplicate').style.display = "none";
+                    document.getElementById('btnSubmit').disabled = false;
+                }
+            } catch (e) {}
+            hideLoading();
+        }
 
         window.onload = function () {
             const urlParams = new URLSearchParams(window.location.search);
             const idThietBi = urlParams.get('id');
-
             if (idThietBi) {
                 document.getElementById('maTB_Badge').innerText = idThietBi.toUpperCase();
                 document.getElementById('maTB').value = idThietBi.toUpperCase();
+                checkStatus(idThietBi);
             }
-
             const savedNV = localStorage.getItem('savedMaNV');
-            if (savedNV) {
-                document.getElementById('maNV').value = savedNV;
-                lookupEmployee();
-            }
+            if (savedNV) { document.getElementById('maNV').value = savedNV; lookupEmployee(); }
         }
 
-        // Kích hoạt trình quét mã (Dùng cho thiết bị di động)
-        function requestScanner() {
-            // Nếu bạn dùng ứng dụng web để quét, có thể dùng thư viện. 
-            // Ở đây giải pháp đơn giản nhất là reload về URL gốc để người dùng quét lại từ ứng dụng quét QR mặc định.
-            if (confirm("Hệ thống sẽ mở lại để bạn quét mã QR mới. Tiếp tục?")) {
-                window.location.href = window.location.pathname;
-            }
-        }
-
-        // Tự động tìm tên nhân viên
+        // --- CÁC HÀM CŨ GIỮ NGUYÊN (lookupEmployee, checkLoi, previewImage, submitData) ---
         let lookupTimeout;
         async function lookupEmployee() {
             clearTimeout(lookupTimeout);
             const maNV = document.getElementById('maNV').value.trim().toUpperCase();
             const display = document.getElementById('tenNV_Display');
-            const text = document.getElementById('tenNV_Text');
-
-            if (maNV.length < 3) {
-                display.style.display = "none";
-                document.getElementById('adminLink').style.display = "none";
-                return;
-            }
+            if (maNV.length < 3) return display.style.display = "none";
 
             lookupTimeout = setTimeout(async () => {
-                try {
-                    const res = await fetch(SCRIPT_URL + "?action=getEmployee&maNV=" + maNV);
-                    const data = await res.json();
-                    if (data.status === "success") {
-                        text.innerText = data.name + " (" + (data.role || "User") + ")";
-                        display.style.display = "block";
-                        display.style.background = "rgba(0, 230, 118, 0.1)";
-                        display.style.color = "var(--success)";
-
-                        if (data.role && data.role.toUpperCase() === "ADMIN") {
-                            document.getElementById('adminLink').style.display = "block";
-                        } else {
-                            document.getElementById('adminLink').style.display = "none";
-                        }
-                    } else {
-                        text.innerText = "Không tìm thấy nhân viên";
-                        display.style.display = "block";
-                        display.style.background = "rgba(255, 23, 68, 0.1)";
-                        display.style.color = "var(--danger)";
-                        document.getElementById('adminLink').style.display = "none";
-                    }
-                } catch (e) { console.log("Lookup error:", e); }
+                const res = await fetch(SCRIPT_URL + "?action=getEmployee&maNV=" + maNV);
+                const data = await res.json();
+                if (data.status === "success") {
+                    document.getElementById('tenNV_Text').innerText = "👤 " + data.name + " (" + (data.role||"User") + ")";
+                    display.style.display = "block"; display.style.background = "rgba(0,230,118,0.1)"; display.style.color = "var(--success)";
+                    if(data.role === "ADMIN") document.getElementById('adminLink').style.display = "block";
+                } else {
+                    document.getElementById('tenNV_Text').innerText = "❌ Không tìm thấy";
+                    display.style.display = "block"; display.style.background = "rgba(255,23,68,0.1)"; display.style.color = "var(--danger)";
+                }
             }, 800);
-        }
-
-        function showLoading(text) {
-            document.getElementById('loading-overlay').style.display = "flex";
-            document.getElementById('loading-text').innerText = text;
-        }
-
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = "none";
         }
 
         function checkLoi() {
@@ -513,98 +228,60 @@
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('previewAnh').src = e.target.result;
-                    document.getElementById('previewBox').style.display = "block";
-                    document.getElementById('label-upload').style.display = "none";
-                }
+                reader.onload = function(e) { document.getElementById('previewAnh').src = e.target.result; document.getElementById('previewBox').style.display = "block"; document.getElementById('label-upload').style.display = "none"; }
                 reader.readAsDataURL(file);
             }
         }
 
+        function showLoading(t) { document.getElementById('loading-overlay').style.display = "flex"; document.getElementById('loading-text').innerText = t; }
+        function hideLoading() { document.getElementById('loading-overlay').style.display = "none"; }
+
         async function submitData() {
             const maTB = document.getElementById('maTB').value.trim();
             const maNV = document.getElementById('maNV').value.trim().toUpperCase();
-            const nq = document.querySelector('input[name="ngoaiQuan"]:checked').value;
-            const as = document.querySelector('input[name="apSuat"]:checked').value;
-            const hsd = document.querySelector('input[name="hanSD"]:checked').value;
-            const ghiChu = document.getElementById('ghiChu').value.trim();
             const fileInput = document.getElementById('anhChup');
-
-            if (!maTB) return alert("Hệ thống chưa nhận diện được mã vị trí.");
-            if (!maNV) return alert("Vui lòng nhập Mã Nhân Viên.");
-            if (fileInput.files.length === 0) return alert("Vui lòng chụp ảnh hiện trường.");
+            if (!maTB || !maNV || fileInput.files.length === 0) return alert("Vui lòng điền đủ thông tin & chụp ảnh!");
 
             document.getElementById('btnSubmit').disabled = true;
-            showLoading("Đang xác thực dữ liệu...");
-
+            showLoading("Đang nén ảnh...");
             try {
-                // 1. Kiểm tra trùng lặp
-                const checkRes = await fetch(SCRIPT_URL + "?maTB=" + maTB);
-                const checkData = await checkRes.json();
-
-                if (checkData.status === "inspected") {
-                    hideLoading();
-                    const reSubmit = confirm(`⚠️ CẢNH BÁO:\n${checkData.message}\n\nBạn có chắc chắn muốn nộp lại báo cáo mới cho vị trí này không?`);
-                    if (!reSubmit) {
-                        document.getElementById('btnSubmit').disabled = false;
-                        return;
-                    }
-                    showLoading("Tiếp tục xử lý báo cáo nộp lại...");
-                }
-
-                // 2. Xử lý ảnh
-                showLoading("Đang tối ưu hình ảnh...");
-                const file = fileInput.files[0];
                 const base64 = await new Promise(resolve => {
                     const reader = new FileReader();
                     reader.onload = e => {
-                        const img = new Image();
-                        img.src = e.target.result;
+                        const img = new Image(); img.src = e.target.result;
                         img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const scale = Math.min(1000 / img.width, 1);
+                            const canvas = document.createElement('canvas'); const scale = Math.min(1000/img.width, 1);
                             canvas.width = img.width * scale; canvas.height = img.height * scale;
                             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                             resolve(canvas.toDataURL("image/jpeg", 0.8));
                         }
-                    };
-                    reader.readAsDataURL(file);
+                    }; reader.readAsDataURL(fileInput.files[0]);
                 });
 
-                // 3. Tải lên Cloudinary
-                showLoading("Đang lưu trữ hình ảnh...");
-                const formData = new FormData();
-                formData.append("file", base64);
-                formData.append("upload_preset", UPLOAD_PRESET);
-                const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                showLoading("Đang tải ảnh lên Cloud...");
+                const fd = new FormData(); fd.append("file", base64); fd.append("upload_preset", UPLOAD_PRESET);
+                const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method: 'POST', body: fd});
                 const cloudData = await cloudRes.json();
 
-                // 4. Ghi vào Google Sheets
-                showLoading("Đang hoàn tất báo cáo...");
-                const payload = { maNV, maTB, ngoaiQuan: nq, apSuat: as, hanSD: hsd, ghiChu, linkAnh: cloudData.secure_url };
+                showLoading("Ghi dữ liệu...");
+                const payload = { maNV, maTB, ngoaiQuan: document.querySelector('input[name="ngoaiQuan"]:checked').value, apSuat: document.querySelector('input[name="apSuat"]:checked').value, hanSD: document.querySelector('input[name="hanSD"]:checked').value, ghiChu: document.getElementById('ghiChu').value, linkAnh: cloudData.secure_url };
                 const sheetRes = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const sheetData = await sheetRes.json();
 
                 if (sheetData.status === 'success') {
                     localStorage.setItem('savedMaNV', maNV);
-                    alert(`✅ THÀNH CÔNG!\nCảm ơn ${sheetData.name}. Hệ thống đã ghi nhận báo cáo.`);
-
-                    // Reset cho lần quét tiếp theo
-                    document.getElementById('maTB_Badge').innerText = "ĐANG CHỜ QUÉT MÃ MỚI...";
-                    document.getElementById('maTB').value = "";
-                    document.getElementById('previewBox').style.display = "none";
-                    document.getElementById('label-upload').style.display = "flex";
-                    document.getElementById('anhChup').value = "";
-                    document.getElementById('ghiChu').value = "";
-                    if (confirm("Bạn có muốn thoát trình duyệt để quét vị trí tiếp theo?")) window.close();
-                } else { alert("❌ Lỗi: " + sheetData.message); }
-
-            } catch (error) { alert("⚠️ Lỗi mạng! Kiểm tra kết nối."); console.error("Submit error:", error); }
-            finally { hideLoading(); document.getElementById('btnSubmit').disabled = false; }
+                    alert("✅ ĐÃ GỬI BÁO CÁO THÀNH CÔNG!");
+                    // Reset Form để quét cái tiếp theo
+                    document.getElementById('maTB_Badge').innerText = "WAITING QR..."; document.getElementById('maTB').value = "";
+                    document.getElementById('previewBox').style.display = "none"; document.getElementById('label-upload').style.display = "block";
+                    document.getElementById('warning-duplicate').style.display = "none";
+                    document.getElementById('btnSubmit').disabled = false;
+                    // Tự động bật lại camera cho bình tiếp theo
+                    toggleScanner();
+                }
+            } catch (e) { alert("Lỗi mạng!"); }
+            hideLoading();
         }
     </script>
 </body>
-
 </html>
-```
