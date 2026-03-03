@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        /* GIỮ NGUYÊN TOÀN BỘ CSS CỦA BẠN BÊN TRÊN */
         :root { --primary: #ff4d4d; --primary-glow: rgba(255, 77, 77, 0.4); --success: #00e676; --danger: #ff1744; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); --text-main: #ffffff; --text-muted: rgba(255, 255, 255, 0.6); }
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         body { font-family: 'Outfit', sans-serif; background: var(--bg-gradient); background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; color: var(--text-main); overflow-x: hidden; }
@@ -38,17 +37,18 @@
         @keyframes spin { 100% { transform: rotate(360deg); } }
         #warning-duplicate { display: none; background: rgba(255, 23, 68, 0.1); border: 1px solid var(--danger); color: #ff8a80; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; font-weight: 600; }
         
-        /* CSS cho QR Scanner Mới */
-        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 10px; border: 2px solid var(--primary); }
-        #qr-reader button { background: var(--glass-bg); color: white; border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; margin: 5px; }
+        /* Cải tiến Khung Camera quét QR */
+        #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 10px; border: 2px solid var(--primary); background: black; }
+        #qr-reader video { width: 100% !important; border-radius: 10px; object-fit: cover; }
+        
+        /* Nút chuyển trang Admin nổi bật */
+        #adminLink { display: none; margin-top: 15px; text-align: center; }
+        #adminLink a { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 5px 15px var(--primary-glow); }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div class="spinner"></div>
-        <div id="loading-text" style="font-weight: 600;">Đang xử lý dữ liệu...</div>
-    </div>
+    <div id="loading-overlay"><div class="spinner"></div><div id="loading-text" style="font-weight: 600;">Đang xử lý dữ liệu...</div></div>
 
     <div class="app-container">
         <div class="header-section">
@@ -79,8 +79,8 @@
             <div id="tenNV_Display" style="margin-top: 10px; font-weight: 700; display: none; text-align: center; padding: 8px; border-radius: 10px;">
                 <span id="tenNV_Text"></span>
             </div>
-            <div id="adminLink" style="display: none; margin-top: 10px; text-align: center;">
-                <a href="Admin.html" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 13px;">⚙️ TRANG QUẢN TRỊ (ADMIN)</a>
+            <div id="adminLink">
+                <a href="admin.html">⚙️ ĐẾN TRANG QUẢN TRỊ (ADMIN)</a>
             </div>
         </div>
 
@@ -127,41 +127,49 @@
         const CLOUD_NAME = "dlajbw9jc";
         const UPLOAD_PRESET = "pccc_anh";
 
-        // Logic Scanner Web App
-        let html5QrcodeScanner;
+        // ==========================================
+        // CAMERA SAU (MẶC ĐỊNH) DÙNG HTML5QRCODE
+        // ==========================================
+        let html5QrCode;
         
         function toggleScanner() {
             const readerDiv = document.getElementById('qr-reader');
             if (readerDiv.style.display === "block") {
+                // Đang mở thì đóng lại
                 readerDiv.style.display = "none";
-                if(html5QrcodeScanner) html5QrcodeScanner.clear();
+                if(html5QrCode) {
+                    html5QrCode.stop().then(() => { html5QrCode.clear(); }).catch(err => console.log(err));
+                }
             } else {
+                // Đang đóng thì mở lên (Bắt buộc Camera Sau)
                 readerDiv.style.display = "block";
-                html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+                
+                html5QrCode.start(
+                    { facingMode: "environment" }, // CHÌA KHÓA: ÉP MỞ CAMERA SAU
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanFailure
+                ).catch(err => {
+                    alert("Không thể mở camera. Vui lòng cấp quyền truy cập Camera cho trình duyệt!");
+                    readerDiv.style.display = "none";
+                });
             }
         }
 
         async function onScanSuccess(decodedText, decodedResult) {
-            // Khi quét thành công, dừng camera
-            html5QrcodeScanner.clear();
-            document.getElementById('qr-reader').style.display = "none";
+            // Tắt camera ngay khi quét thành công
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('qr-reader').style.display = "none";
+                });
+            }
             
-            // Xử lý chuỗi URL lấy ID
             try {
-                let id = "";
-                if(decodedText.includes("?id=")) {
-                    id = new URL(decodedText).searchParams.get('id');
-                } else {
-                    id = decodedText; // Nếu mã QR chỉ là chữ
-                }
-                
+                let id = decodedText.includes("?id=") ? new URL(decodedText).searchParams.get('id') : decodedText;
                 document.getElementById('maTB_Badge').innerText = id.toUpperCase();
                 document.getElementById('maTB').value = id.toUpperCase();
-                
-                // Gọi server check trùng lặp
                 checkStatus(id);
-                
             } catch(e) { alert("Mã QR không hợp lệ!"); }
         }
 
@@ -195,13 +203,21 @@
             if (savedNV) { document.getElementById('maNV').value = savedNV; lookupEmployee(); }
         }
 
-        // --- CÁC HÀM CŨ GIỮ NGUYÊN (lookupEmployee, checkLoi, previewImage, submitData) ---
+        // ==========================================
+        // TÌM NHÂN VIÊN & HIỆN NÚT ADMIN
+        // ==========================================
         let lookupTimeout;
         async function lookupEmployee() {
             clearTimeout(lookupTimeout);
             const maNV = document.getElementById('maNV').value.trim().toUpperCase();
             const display = document.getElementById('tenNV_Display');
-            if (maNV.length < 3) return display.style.display = "none";
+            const adminLink = document.getElementById('adminLink');
+            
+            if (maNV.length < 3) {
+                display.style.display = "none";
+                adminLink.style.display = "none";
+                return;
+            }
 
             lookupTimeout = setTimeout(async () => {
                 const res = await fetch(SCRIPT_URL + "?action=getEmployee&maNV=" + maNV);
@@ -209,10 +225,17 @@
                 if (data.status === "success") {
                     document.getElementById('tenNV_Text').innerText = "👤 " + data.name + " (" + (data.role||"User") + ")";
                     display.style.display = "block"; display.style.background = "rgba(0,230,118,0.1)"; display.style.color = "var(--success)";
-                    if(data.role === "ADMIN") document.getElementById('adminLink').style.display = "block";
+                    
+                    // NẾU LÀ ADMIN THÌ HIỆN NÚT
+                    if(data.role.toUpperCase() === "ADMIN") {
+                        adminLink.style.display = "block";
+                    } else {
+                        adminLink.style.display = "none";
+                    }
                 } else {
                     document.getElementById('tenNV_Text').innerText = "❌ Không tìm thấy";
                     display.style.display = "block"; display.style.background = "rgba(255,23,68,0.1)"; display.style.color = "var(--danger)";
+                    adminLink.style.display = "none";
                 }
             }, 800);
         }
@@ -236,14 +259,20 @@
         function showLoading(t) { document.getElementById('loading-overlay').style.display = "flex"; document.getElementById('loading-text').innerText = t; }
         function hideLoading() { document.getElementById('loading-overlay').style.display = "none"; }
 
+        // ==========================================
+        // GỬI DỮ LIỆU & TỰ ĐỘNG BẬT CAMERA CHO BÌNH TIẾP THEO
+        // ==========================================
         async function submitData() {
             const maTB = document.getElementById('maTB').value.trim();
             const maNV = document.getElementById('maNV').value.trim().toUpperCase();
             const fileInput = document.getElementById('anhChup');
-            if (!maTB || !maNV || fileInput.files.length === 0) return alert("Vui lòng điền đủ thông tin & chụp ảnh!");
+            
+            if (!maTB) return alert("Hệ thống chưa nhận diện được mã vị trí!");
+            if (!maNV) return alert("Vui lòng nhập Mã Nhân Viên!");
+            if (fileInput.files.length === 0) return alert("Bạn chưa chụp ảnh minh chứng!");
 
             document.getElementById('btnSubmit').disabled = true;
-            showLoading("Đang nén ảnh...");
+            showLoading("Đang xử lý ảnh...");
             try {
                 const base64 = await new Promise(resolve => {
                     const reader = new FileReader();
@@ -258,12 +287,12 @@
                     }; reader.readAsDataURL(fileInput.files[0]);
                 });
 
-                showLoading("Đang tải ảnh lên Cloud...");
+                showLoading("Đang tải ảnh lên hệ thống...");
                 const fd = new FormData(); fd.append("file", base64); fd.append("upload_preset", UPLOAD_PRESET);
                 const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {method: 'POST', body: fd});
                 const cloudData = await cloudRes.json();
 
-                showLoading("Ghi dữ liệu...");
+                showLoading("Đang ghi vào sổ cái...");
                 const payload = { maNV, maTB, ngoaiQuan: document.querySelector('input[name="ngoaiQuan"]:checked').value, apSuat: document.querySelector('input[name="apSuat"]:checked').value, hanSD: document.querySelector('input[name="hanSD"]:checked').value, ghiChu: document.getElementById('ghiChu').value, linkAnh: cloudData.secure_url };
                 const sheetRes = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const sheetData = await sheetRes.json();
@@ -271,15 +300,21 @@
                 if (sheetData.status === 'success') {
                     localStorage.setItem('savedMaNV', maNV);
                     alert("✅ ĐÃ GỬI BÁO CÁO THÀNH CÔNG!");
-                    // Reset Form để quét cái tiếp theo
-                    document.getElementById('maTB_Badge').innerText = "WAITING QR..."; document.getElementById('maTB').value = "";
-                    document.getElementById('previewBox').style.display = "none"; document.getElementById('label-upload').style.display = "block";
+                    
+                    // Xóa trắng form để làm bình tiếp theo
+                    document.getElementById('maTB_Badge').innerText = "WAITING QR..."; 
+                    document.getElementById('maTB').value = "";
+                    document.getElementById('previewBox').style.display = "none"; 
+                    document.getElementById('label-upload').style.display = "block";
+                    document.getElementById('anhChup').value = "";
+                    document.getElementById('ghiChu').value = "";
                     document.getElementById('warning-duplicate').style.display = "none";
                     document.getElementById('btnSubmit').disabled = false;
-                    // Tự động bật lại camera cho bình tiếp theo
+                    
+                    // TỰ ĐỘNG BẬT CAMERA CHO BÌNH TIẾP THEO
                     toggleScanner();
-                }
-            } catch (e) { alert("Lỗi mạng!"); }
+                } else { alert("❌ Lỗi Backend: " + sheetData.message); }
+            } catch (e) { alert("Lỗi kết nối mạng!"); }
             hideLoading();
         }
     </script>
