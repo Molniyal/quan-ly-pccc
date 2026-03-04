@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>In Tem QR</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #e2e8f0;}
+    .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
+    .btn { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight:bold;}
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: white; padding: 20px; max-width: 210mm; margin: auto;}
+    .ticket { border: 1px dashed #ccc; padding: 10px; text-align: center; page-break-inside: avoid;}
+    .qr-img { width: 120px; height: 120px; margin-bottom: 5px; }
+    @media print {
+      body { background: white; padding: 0;}
+      .controls { display: none;}
+      .grid { max-width: 100%; padding: 0; border: none;}
+      .ticket { border: 1px solid #000;}
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h2>🖨️ XUẤT FILE IN TEM QR CODE TỪ GOOGLE SHEET</h2>
+    <button class="btn" onclick="window.print()">IN RA GIẤY A4</button>
+  </div>
+  <h3 id="loading" style="text-align: center;">⏳ Đang tải dữ liệu từ Google Sheets...</h3>
+  <div class="grid" id="printArea"></div>
+
+  <script>
+    // ĐIỀN LINK GOOGLE SCRIPT VÀ TÊN MIỀN VÀO ĐÂY
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxJH_M_NsHiwt5yfDblW46eClpwxiuxDKkbERdgx5mCAw-plxwm3RTZI5K0CvbiWjR6Q/exec";
+    const DOMAIN = "https://molniyal.github.io/quan-ly-pccc/";
+
+    window.onload = async () => {
+      const maNv = localStorage.getItem('pccc_admin');
+      if(!maNv) return alert("Vui lòng đăng nhập ở trang Admin trước khi in tem!");
+
+      const reqId = new URLSearchParams(window.location.search).get('id');
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getDashboardData&maNV=${maNv}`);
+        const data = await res.json();
+        
+        document.getElementById('loading').style.display = 'none';
+        
+        let targetLocations = data.locations;
+        if(reqId && reqId !== 'ALL') {
+          targetLocations = data.locations.filter(l => l.ma_tb === reqId);
+        }
+
+        const area = document.getElementById('printArea');
+        area.innerHTML = targetLocations.map(loc => {
+          const qrUrl = `https://quickchart.io/qr?size=150&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + loc.ma_tb)}`;
+          return `
+            <div class="ticket">
+              <img src="${qrUrl}" class="qr-img">
+              <h3 style="margin:5px 0;">${loc.ma_tb}</h3>
+              <p style="margin:0; font-size:12px; color:#64748b;">${loc.xuong} - ${loc.khu_vuc}</p>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {
+        alert("Lỗi tải dữ liệu!");
+      }
+    };
+  </script>
+</body>
+</html>

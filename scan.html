@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Quét Mã PCCC</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body { font-family: Arial; background: #f1f5f9; padding: 15px; margin: 0; }
+    .card { background: white; border-radius: 12px; padding: 20px; max-width: 500px; margin: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    input, select, button { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    .btn { background: #2563eb; color: white; font-weight: bold; border: none; cursor: pointer; }
+    #reader { display: none; width: 100%; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="text-align: center;">🔥 KIỂM TRA PCCC</h2>
+    
+    <div id="reader"></div>
+    <button class="btn" style="background:#10b981;" onclick="startScan()">📷 BẬT CAMERA QUÉT QR</button>
+    <button class="btn" style="background:#f59e0b;" onclick="document.getElementById('manualBox').style.display='block'">⚠️ Nhập tay (QR Hỏng)</button>
+
+    <div id="manualBox" style="display:none; background:#fffbeb; padding:15px; border-radius:8px; margin-bottom:15px;">
+      <input type="text" id="manTb" placeholder="Nhập mã thiết bị (VD: BCC-01)">
+      <input type="password" id="manCode" placeholder="Mã xác nhận hỏng (1111)">
+      <button class="btn" style="background:#ea580c;" onclick="confirmManual()">Xác nhận</button>
+    </div>
+
+    <div id="devInfo" style="display:none; background:#e0f2fe; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;"></div>
+
+    <form id="reportForm" style="display:none;">
+      <input type="hidden" id="maTb">
+      <input type="text" id="maNv" placeholder="Mã NV của bạn..." style="text-transform: uppercase;" required>
+      <select id="ngoaiQuan"><option value="ĐẠT">✅ Ngoại quan: ĐẠT</option><option value="LỖI">❌ Ngoại quan: LỖI</option></select>
+      <select id="apSuat"><option value="ĐẠT">✅ Áp suất: ĐẠT</option><option value="LỖI">❌ Áp suất: LỖI</option></select>
+      <select id="hanSD"><option value="Còn hạn">✅ Hạn SD: CÒN HẠN</option><option value="Hết hạn">❌ Hạn SD: HẾT HẠN</option></select>
+      <input type="text" id="ghiChu" placeholder="Mô tả lỗi (nếu có)">
+      <label style="display:block; margin-bottom:5px; font-weight:bold;">Chụp ảnh minh chứng:</label>
+      <input type="file" id="anhChup" accept="image/*" capture="environment" required>
+      
+      <button type="submit" id="btnSubmit" class="btn" style="background:#16a34a; font-size:16px;">🚀 GỬI BÁO CÁO</button>
+    </form>
+  </div>
+
+  <script>
+    // ĐIỀN THÔNG TIN CỦA BẠN VÀO ĐÂY
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxJH_M_NsHiwt5yfDblW46eClpwxiuxDKkbERdgx5mCAw-plxwm3RTZI5K0CvbiWjR6Q/exec";
+    const CLOUD_NAME = "dlajbw9jc";
+    const UPLOAD_PRESET = "pccc_anh";
+
+    let scanner;
+
+    window.onload = () => {
+      const id = new URLSearchParams(window.location.search).get('id');
+      if(id) loadDevice(id);
+      const savedNv = localStorage.getItem('savedMaNV');
+      if(savedNv) document.getElementById('maNv').value = savedNv;
+    };
+
+    function startScan() {
+      document.getElementById('reader').style.display = 'block';
+      scanner = new Html5Qrcode("reader");
+      scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+          scanner.stop(); document.getElementById('reader').style.display = 'none';
+          const id = text.includes('?id=') ? new URL(text).searchParams.get('id') : text;
+          loadDevice(id);
+      }, (err) => {});
+    }
+
+    async function confirmManual() {
+      const id = document.getElementById('manTb').value.toUpperCase();
+      if(document.getElementById('manCode').value !== "1111") return alert("Sai mã xác thực!");
+      
+      // Báo Google Sheet cập nhật cột QR Hỏng
+      await fetch(`${SCRIPT_URL}?action=reportBrokenQR&id=${id}`);
+      alert("Đã báo cáo QR hỏng cho Admin!");
+      loadDevice(id);
+    }
+
+    async function loadDevice(id) {
+      document.getElementById('devInfo').style.display = 'block';
+      document.getElementById('devInfo').innerHTML = "⏳ Đang tra cứu...";
+      
+      try {
+        const res = await fetch(`${SCRIPT_URL}?action=getDevice&id=${id}`);
+        const data = await res.json();
+        
+        if (data.status === "error") throw new Error();
+        
+        document.getElementById('devInfo').innerHTML = `📍 Vị trí: <b>${data.ma_tb}</b><br><span style="color:#64748b;">${data.xuong} - ${data.khu_vuc}</span>`;
+        document.getElementById('maTb').value = id;
+        document.getElementById('reportForm').style.display = 'block';
+        document.getElementById('manualBox').style.display = 'none';
+      } catch(e) {
+        document.getElementById('devInfo').innerHTML = "❌ Mã thiết bị không tồn tại!";
+      }
+    }
+
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit'); btn.disabled = true; btn.innerText = "⏳ Đang gửi...";
+
+      try {
+        const file = document.getElementById('anhChup').files[0];
+        
+        // Nén ảnh bằng Canvas
+        const base64 = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = Math.min(800 / img.width, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL("image/jpeg", 0.7));
+                }
+            }; reader.readAsDataURL(file);
+        });
+
+        // Tải lên Cloudinary
+        const formData = new FormData();
+        formData.append("file", base64);
+        formData.append("upload_preset", UPLOAD_PRESET);
+        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+        const cloudData = await cloudRes.json();
+
+        // Gửi về Google Sheets
+        const payload = {
+          maNV: document.getElementById('maNv').value,
+          maTB: document.getElementById('maTb').value,
+          ngoaiQuan: document.getElementById('ngoaiQuan').value,
+          apSuat: document.getElementById('apSuat').value,
+          hanSD: document.getElementById('hanSD').value,
+          ghiChu: document.getElementById('ghiChu').value,
+          linkAnh: cloudData.secure_url
+        };
+
+        const sheetRes = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const sheetData = await sheetRes.json();
+
+        if(sheetData.status !== "success") throw new Error(sheetData.message);
+
+        localStorage.setItem('savedMaNV', payload.maNV);
+        alert("✅ Đã ghi nhận báo cáo thành công!");
+        window.location.href = window.location.pathname; 
+      } catch (err) { alert("Lỗi: " + err.message); }
+      
+      btn.disabled = false; btn.innerText = "🚀 GỬI BÁO CÁO";
+    });
+  </script>
+</body>
+</html>
