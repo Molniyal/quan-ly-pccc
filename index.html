@@ -16,7 +16,6 @@
     .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; color: #cbd5e1; cursor: pointer; border-radius: 8px; margin-bottom: 8px; white-space: nowrap;}
     .sidebar-item.active, .sidebar-item:hover { background: var(--primary); color: white;}
     
-    /* PC Collapse */
     @media (min-width: 769px) {
         .sidebar.collapsed { width: var(--sidebar-collapsed); padding: 20px 10px;}
         .sidebar.collapsed .hide-text { display: none; }
@@ -26,7 +25,6 @@
         .main-content.expanded { margin-left: var(--sidebar-collapsed); width: calc(100% - var(--sidebar-collapsed));}
     }
     
-    /* Mobile Overlay */
     #mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(2px);}
     @media (max-width: 768px) {
         .sidebar { transform: translateX(-100%); }
@@ -47,7 +45,6 @@
     .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
     .content-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
     
-    /* Bảng biểu responsive */
     .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
     table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px;}
     th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle; white-space: nowrap;}
@@ -61,22 +58,21 @@
     .btn-icon { padding: 6px; border-radius: 6px; }
     
     .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; background: #f8fafc; padding: 15px; border-radius: 8px; flex-wrap: wrap;}
-    .filter-bar select, .filter-bar input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; flex: 1; min-width: 130px;}
+    .filter-bar select, .filter-bar input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; min-width: 130px;}
     
     .form-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing:border-box;}
 
     /* ===== MODALS DIALOGS ===== */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(4px);}
-    .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-sizing:border-box; animation: popIn 0.3s;}
+    .modal-content { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 500px; box-sizing:border-box; animation: popIn 0.3s; max-height: 90vh; overflow-y: auto;}
     @keyframes popIn { from {transform: scale(0.9); opacity:0;} to {transform: scale(1); opacity:1;} }
     
-    /* ===== TOAST NOTIFICATION ===== */
     #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;}
     .toast { padding: 15px 25px; border-radius: 8px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-weight: 500; animation: slideInRight 0.3s forwards;}
     .toast.success { background: #10b981; } .toast.error { background: #ef4444; } .toast.warning { background: #f59e0b; color: #000; }
     @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    .chart-container { position: relative; height: 300px; width: 100%; }
+    .chart-container { position: relative; height: 350px; width: 100%; }
     #printArea { display: none; }
     @media print {
       body { background: white; padding: 0; display: block; overflow: visible;}
@@ -85,6 +81,9 @@
       .ticket { border: 1px dashed #000; padding: 15px; text-align: center; page-break-inside: avoid; }
       .ticket img { width: 120px; height: 120px; margin-bottom: 5px;}
     }
+
+    .report-image-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ccc; }
+    input[type=checkbox] { transform: scale(1.5); cursor: pointer; }
   </style>
 </head>
 <body>
@@ -94,7 +93,7 @@
   <div id="mobile-overlay" onclick="toggleSidebar()"></div>
 
   <div id="customDialog" class="modal-overlay" style="display:none;">
-      <div class="modal-content" style="text-align: center;">
+      <div class="modal-content" style="text-align: center; max-width: 350px;">
           <h3 id="dialogTitle" style="margin-top:0;">Xác nhận</h3>
           <p id="dialogMessage" style="margin: 15px 0; color:#475569; font-size:15px;"></p>
           <input type="text" id="dialogInput" class="form-input" style="display:none;">
@@ -106,7 +105,7 @@
   </div>
 
   <div id="loginModal" class="modal-overlay">
-    <div class="modal-content" style="text-align: center;">
+    <div class="modal-content" style="text-align: center; max-width: 350px;">
       <div style="background:#2563eb; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;"><i data-lucide="shield" style="color:white; width:30px; height:30px;"></i></div>
       <h2 style="margin-bottom: 25px; color: #0f172a;">HỆ THỐNG ERP</h2>
       <form id="loginForm">
@@ -117,19 +116,45 @@
     </div>
   </div>
 
-  <div id="editModal" class="modal-overlay" style="display:none;">
+  <div id="editLogModal" class="modal-overlay" style="display:none;">
       <div class="modal-content">
-          <h3 style="margin-top:0;">Sửa Nhật Ký <span id="editMaTB" style="color:var(--primary);"></span></h3>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin:0;">Báo Cáo: <span id="editMaTB" style="color:var(--primary);"></span></h3>
+              <button class="menu-btn" onclick="document.getElementById('editLogModal').style.display='none'"><i data-lucide="x"></i></button>
+          </div>
+          <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+          
+          <img id="editImage" class="report-image-preview" src="" alt="Ảnh minh chứng">
+          <p style="font-size:13px; color:#666; margin-bottom:15px;">Người KT: <b id="editNguoiKT"></b> | Thời gian: <b id="editTime"></b></p>
+          
           <input type="hidden" id="editThoiGian">
-          <label style="font-size:14px; font-weight:600; display:block; margin-bottom:5px;">Ngoại quan:</label>
-          <select id="editNq" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select>
-          <label style="font-size:14px; font-weight:600; display:block; margin-bottom:5px;">Áp suất:</label>
-          <select id="editAs" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select>
-          <label style="font-size:14px; font-weight:600; display:block; margin-bottom:5px;">Ghi chú:</label>
-          <input type="text" id="editGc" class="form-input" placeholder="Sửa ghi chú...">
+          <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                  <label style="font-size:13px; font-weight:600;">Ngoại quan:</label>
+                  <select id="editNq" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select>
+              </div>
+              <div style="flex:1;">
+                  <label style="font-size:13px; font-weight:600;">Áp suất:</label>
+                  <select id="editAs" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select>
+              </div>
+          </div>
+          <label style="font-size:13px; font-weight:600;">Ghi chú chi tiết:</label>
+          <textarea id="editGc" class="form-input" rows="3"></textarea>
+          
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="submitEditLog()"><i data-lucide="save"></i> Lưu Thay Đổi</button>
+      </div>
+  </div>
+
+  <div id="editLocModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content" style="max-width:350px;">
+          <h3 style="margin-top:0;">Sửa Vị Trí: <span id="editLocMaTB" style="color:var(--primary);"></span></h3>
+          <label style="font-size:13px; font-weight:600;">Tên Xưởng:</label>
+          <input type="text" id="editLocXuong" class="form-input">
+          <label style="font-size:13px; font-weight:600;">Khu Vực:</label>
+          <input type="text" id="editLocKhuVuc" class="form-input">
           <div style="display:flex; gap:10px; margin-top:10px;">
-              <button class="btn btn-primary" style="flex:1;" onclick="submitEdit()">Lưu thay đổi</button>
-              <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;" onclick="document.getElementById('editModal').style.display='none'">Hủy</button>
+              <button class="btn btn-primary" style="flex:1;" onclick="submitEditLoc()">Lưu Cập Nhật</button>
+              <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;" onclick="document.getElementById('editLocModal').style.display='none'">Hủy</button>
           </div>
       </div>
   </div>
@@ -143,7 +168,7 @@
     <hr style="border-color: #334155; margin: 20px 0;">
     <a href="scan.html" target="_blank" class="sidebar-item" style="text-decoration: none;"><i data-lucide="smartphone"></i> <span class="hide-text">App Quét Mã</span></a>
     <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
-      <button class="btn btn-danger" style="width: 100%;" onclick="appLogout()"><i data-lucide="log-out"></i> <span class="hide-text">Đăng xuất</span></button>
+      <button class="btn btn-danger" style="width: 100%; justify-content:center;" onclick="appLogout()"><i data-lucide="log-out"></i> <span class="hide-text">Đăng xuất</span></button>
     </div>
   </div>
 
@@ -160,6 +185,7 @@
       <div class="filter-bar">
         <select id="dashYear" onchange="renderDashboard()"></select>
         <select id="dashMonth" onchange="renderDashboard()"></select>
+        <button class="btn" style="background:#e2e8f0; color:#0f172a;" onclick="clearDashFilter()">Xóa Lọc</button>
       </div>
 
       <div class="stats-grid">
@@ -170,7 +196,7 @@
       </div>
 
       <div class="content-card">
-        <h3 style="margin-top: 0;">📊 Tỉ lệ kiểm tra theo Xưởng</h3>
+        <h3 style="margin-top: 0;">📊 Tỉ lệ hoàn thành kiểm tra theo Xưởng</h3>
         <div class="chart-container"><canvas id="progressChart"></canvas></div>
       </div>
     </div>
@@ -189,7 +215,7 @@
             <table>
             <thead><tr>
                 <th width="40"><input type="checkbox" onchange="document.querySelectorAll('.qr-select').forEach(cb=>cb.checked=this.checked)"></th>
-                <th width="60">Mã QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng thái</th>
+                <th width="60">Hình QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng thái</th><th>Thao tác</th>
             </tr></thead>
             <tbody id="locations-table"></tbody>
             </table>
@@ -204,16 +230,16 @@
           <select id="logXuong" onchange="renderLogs()"><option value="ALL">Tất cả Xưởng</option></select>
           <select id="logStatus" onchange="renderLogs()"><option value="ALL">Tất cả TT</option><option value="ERRORS">Chỉ bình LỖI</option></select>
           <input type="text" id="logSearch" placeholder="Tìm mã TB, NV..." onkeyup="renderLogs()">
-          <div style="margin-left: auto; display:flex; gap:10px;">
+          <div style="margin-left: auto; display:flex; gap:10px; flex-wrap:wrap;">
              <button class="btn btn-warning" onclick="sendSelectedEmails()"><i data-lucide="mail"></i> Email cho mục đã chọn</button>
-             <button class="btn btn-success" onclick="sendMassEmail()"><i data-lucide="file-text"></i> Xuất Báo Cáo Bảng</button>
+             <button class="btn btn-success" onclick="sendMassEmail()"><i data-lucide="file-text"></i> Gửi Báo Cáo Bảng</button>
           </div>
         </div>
         <div class="table-responsive">
             <table>
             <thead><tr>
-                <th><input type="checkbox" onchange="document.querySelectorAll('.log-select').forEach(c=>c.checked=this.checked)"></th>
-                <th>Thời gian</th><th>Xưởng</th><th>Mã TB</th><th>Người KT</th><th>Trạng thái</th><th>Ghi chú</th><th>Ảnh</th><th>Hành động</th>
+                <th width="40"><input type="checkbox" onchange="document.querySelectorAll('.log-select').forEach(c=>c.checked=this.checked)"></th>
+                <th>Thời gian</th><th>Xưởng</th><th>Mã TB</th><th>Người KT</th><th>Trạng thái</th><th>Ghi chú</th><th>Hành động</th>
             </tr></thead>
             <tbody id="logs-table"></tbody>
             </table>
@@ -224,22 +250,22 @@
     <div id="view-settings" class="view-section">
       <div class="content-card" style="max-width: 600px;">
         <h3>⚙️ Cấu hình gửi Email Tự động</h3>
-        <label style="font-weight:bold; margin-bottom:5px; display:block;">Email Nhận mặc định:</label>
+        <label style="font-weight:bold; margin-bottom:5px; display:block;">Email Nhận mặc định (Quản lý/HSE):</label>
         <input type="text" id="set-email" class="form-input" placeholder="hse@congty.com">
         <label style="font-weight:bold; margin-bottom:5px; display:block;">Tiêu đề Email Cảnh báo:</label>
         <input type="text" id="set-subject" class="form-input">
         <label style="font-weight:bold; margin-bottom:5px; display:block;">Mẫu Nội dung (HTML):</label>
         <p style="font-size:12px; color:#64748b; margin-top:0;">Dùng các biến: [MA_TB], [XUONG], [GHI_CHU]</p>
-        <textarea id="set-template" class="form-input" rows="5"></textarea>
-        <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu Cài Đặt</button>
+        <textarea id="set-template" class="form-input" rows="6"></textarea>
+        <button class="btn btn-primary" onclick="saveSettings()"><i data-lucide="save"></i> Lưu Cài Đặt</button>
       </div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyzZ2NIzH1_sNDWf6NnEsk6gaPdGSInW54s7GX3RYkrZPtIDbNLcv3mh0HL1b6a0hCnPA/exec";
+    // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI CỦA BẠN VÀO ĐÂY:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9duWPxV-fvfaBoYFi2m6amWoEKOHSPHlSlJAqR5n3qoIkrESXecvJSQ1Cr-JWL21wmw/exec";
     // 🔴 2. ĐIỀN TÊN MIỀN GITHUB PAGES VÀO ĐÂY:
     const DOMAIN = "https://molniyal.github.io/quan-ly-pccc";
     // ==========================================
@@ -248,12 +274,11 @@
     let currentFilteredLogs = [];
     let myChart = null;
 
-    // ================= TOAST & CUSTOM DIALOGS (Thay thế Alert/Confirm) =================
+    // ================= TOAST & DIALOG SYSTEM =================
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
         let icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'x-circle' : 'alert-circle');
         toast.innerHTML = `<i data-lucide="${icon}"></i> <span>${msg}</span>`;
         container.appendChild(toast);
@@ -266,25 +291,17 @@
         document.getElementById('dialogTitle').innerText = title;
         document.getElementById('dialogMessage').innerText = message;
         const input = document.getElementById('dialogInput');
-        
-        if(isPrompt) { input.style.display = 'block'; input.value = defaultValue; } 
-        else { input.style.display = 'none'; }
-        
+        if(isPrompt) { input.style.display = 'block'; input.value = defaultValue; } else { input.style.display = 'none'; }
         dialogCallback = callback;
         document.getElementById('customDialog').style.display = 'flex';
     }
-
     document.getElementById('dialogBtnOk').addEventListener('click', () => {
         closeDialog();
-        if(dialogCallback) {
-            const val = document.getElementById('dialogInput').style.display === 'block' ? document.getElementById('dialogInput').value : true;
-            dialogCallback(val);
-        }
+        if(dialogCallback) dialogCallback(document.getElementById('dialogInput').style.display === 'block' ? document.getElementById('dialogInput').value : true);
     });
-
     function closeDialog() { document.getElementById('customDialog').style.display = 'none'; }
 
-    // ================= KHỞI TẠO HỆ THỐNG =================
+    // ================= KHỞI TẠO =================
     window.onload = () => {
       lucide.createIcons();
       initDateFilters();
@@ -297,7 +314,6 @@
       }
     };
 
-    // Sidebar Logic
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       const content = document.getElementById('mainContent');
@@ -324,11 +340,8 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const maNv = document.getElementById('maNvLogin').value.trim();
-        const pass = document.getElementById('passLogin').value.trim();
-        const btn = e.target.querySelector('button');
-        btn.innerText = "Đang xác thực...";
-        await fetchData(maNv, pass);
+        const btn = e.target.querySelector('button'); btn.innerText = "Đang xác thực...";
+        await fetchData(document.getElementById('maNvLogin').value.trim(), document.getElementById('passLogin').value.trim());
         btn.innerText = "Đăng Nhập";
     });
 
@@ -341,7 +354,7 @@
       if(element) element.classList.add('active');
       const t = {'dashboard': 'Tổng Quan', 'locations': 'Quản Lý Vị Trí', 'logs': 'Nhật Ký & Báo Cáo', 'settings': 'Cài Đặt Hệ Thống'};
       document.getElementById('pageTitle').innerText = t[tabId];
-      if(window.innerWidth <= 768) toggleSidebar(); // Đóng sidebar sau khi chọn trên mobile
+      if(window.innerWidth <= 768) toggleSidebar();
     }
 
     async function fetchData(maNv, pass) {
@@ -362,7 +375,7 @@
 
         populateDropdowns(); renderDashboard(); renderLocations(); renderLogs();
         showToast("Tải dữ liệu thành công!", "success");
-      } catch (err) { showToast("Lỗi tải dữ liệu mạng!", 'error'); localStorage.removeItem('pccc_session'); }
+      } catch (err) { showToast("Lỗi kết nối mạng!", 'error'); localStorage.removeItem('pccc_session'); }
     }
 
     function populateDropdowns() {
@@ -372,7 +385,13 @@
       document.getElementById('locXuong').innerHTML = html; document.getElementById('logXuong').innerHTML = html;
     }
 
-    // ================= 1. TAB DASHBOARD (Có Clear Filter) =================
+    // ================= 1. TAB DASHBOARD =================
+    function clearDashFilter() {
+        document.getElementById('dashYear').value = "ALL";
+        document.getElementById('dashMonth').value = "ALL";
+        renderDashboard();
+    }
+
     function renderDashboard() {
       const y = document.getElementById('dashYear').value;
       const m = document.getElementById('dashMonth').value;
@@ -404,11 +423,16 @@
 
       const ctx = document.getElementById('progressChart').getContext('2d');
       if(myChart) myChart.destroy();
+      
+      // Tạo dải màu siêu mượt cho Chart
+      const grad1 = ctx.createLinearGradient(0, 0, 0, 400); grad1.addColorStop(0, '#94a3b8'); grad1.addColorStop(1, '#e2e8f0');
+      const grad2 = ctx.createLinearGradient(0, 0, 0, 400); grad2.addColorStop(0, '#10b981'); grad2.addColorStop(1, '#6ee7b7');
+
       myChart = new Chart(ctx, {
         type: 'bar', data: { labels: xuongs, datasets: [
-            { label: 'Tổng thiết bị', data: totalPerXuong, backgroundColor: '#cbd5e1' },
-            { label: 'Đã kiểm tra', data: inspectedPerXuong, backgroundColor: '#059669' }
-        ]}, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            { label: 'Tổng thiết bị', data: totalPerXuong, backgroundColor: grad1, borderRadius: 6 },
+            { label: 'Đã kiểm tra', data: inspectedPerXuong, backgroundColor: grad2, borderRadius: 6 }
+        ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { borderDash: [2, 2] } } } }
       });
     }
 
@@ -417,19 +441,36 @@
       const search = document.getElementById('locSearch').value.toLowerCase();
       const xuong = document.getElementById('locXuong').value;
 
-      let currentLoc = globalData.locations.filter(l => {
-        return (l.ma_tb.toLowerCase().includes(search)) && (xuong === 'ALL' || l.xuong === xuong);
-      });
+      let currentLoc = globalData.locations.filter(l => (l.ma_tb.toLowerCase().includes(search)) && (xuong === 'ALL' || l.xuong === xuong));
 
       document.getElementById('locations-table').innerHTML = currentLoc.map(l => {
         const qrUrl = `https://quickchart.io/qr?size=60&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + l.ma_tb)}`;
         const st = l.qr_broken ? `<span class="badge badge-err">Hỏng QR</span>` : `<span class="badge badge-ok">Tốt</span>`;
         return `<tr>
             <td><input type="checkbox" class="qr-select" value="${l.ma_tb}"></td>
-            <td><img src="${qrUrl}" style="width:40px; border:1px solid #ccc; padding:2px; border-radius:5px;"></td>
+            <td><img src="${qrUrl}" style="width:45px; border:1px solid #ccc; padding:2px; border-radius:5px;"></td>
             <td><b>${l.ma_tb}</b></td><td>${l.xuong}</td><td>${l.khu_vuc}</td><td>${st}</td>
+            <td>
+              <button class="btn btn-warning btn-icon" onclick="openEditLoc('${l.ma_tb}','${l.xuong}','${l.khu_vuc}')" title="Sửa vị trí"><i data-lucide="edit"></i></button>
+              <button class="btn btn-primary btn-icon" onclick="printSingle('${l.ma_tb}')" title="In Tem"><i data-lucide="printer"></i></button>
+            </td>
         </tr>`;
       }).join('');
+      lucide.createIcons();
+    }
+
+    // Sửa Vị Trí
+    function openEditLoc(ma, x, kv) {
+        document.getElementById('editLocMaTB').innerText = ma;
+        document.getElementById('editLocXuong').value = x;
+        document.getElementById('editLocKhuVuc').value = kv;
+        document.getElementById('editLocModal').style.display = 'flex';
+    }
+    async function submitEditLoc() {
+        const payload = { action: "editLocation", maTB: document.getElementById('editLocMaTB').innerText, xuong: document.getElementById('editLocXuong').value, khuVuc: document.getElementById('editLocKhuVuc').value };
+        document.getElementById('editLocModal').style.display='none'; showToast('Đang cập nhật vị trí...', 'warning');
+        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        showToast("Cập nhật thành công! Vui lòng F5 trang.", "success");
     }
 
     function printSelected() {
@@ -446,7 +487,7 @@
         window.print();
     }
 
-    // ================= 3. NHẬT KÝ & CHỨC NĂNG CRUD =================
+    // ================= 3. TAB NHẬT KÝ & CRUD =================
     window.renderLogs = function() {
       const date = document.getElementById('logDate').value; 
       const xuong = document.getElementById('logXuong').value;
@@ -468,15 +509,15 @@
         const locInfo = globalData.locations.find(l => l.ma_tb === log.ma_tb) || {xuong: '?'};
         const isErr = log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI';
         const stUI = isErr ? `<span class="badge badge-err">LỖI</span>` : `<span class="badge badge-ok">ĐẠT</span>`;
-        const logDataStr = encodeURIComponent(JSON.stringify(log));
+        const logStr = encodeURIComponent(JSON.stringify(log));
 
         return `<tr>
-          <td><input type="checkbox" class="log-select" value="${logDataStr}"></td>
+          <td><input type="checkbox" class="log-select" value="${logStr}"></td>
           <td style="font-size:13px;">${new Date(log.thoi_gian).toLocaleString('vi-VN')}</td>
           <td>${locInfo.xuong}</td><td><b>${log.ma_tb}</b></td><td>${log.ten_nv}</td>
-          <td>${stUI}</td><td style="color:#dc2626; font-size:13px;">${log.ghi_chu || ''}</td>
+          <td>${stUI}</td><td style="color:#dc2626; font-size:13px; max-width:150px; overflow:hidden; text-overflow:ellipsis;">${log.ghi_chu || ''}</td>
           <td>
-            <button class="btn btn-primary btn-icon" onclick="openEdit('${log.thoi_gian}', '${log.ma_tb}', '${log.ngoai_quan}', '${log.ap_suat}', '${log.ghi_chu}')" title="Sửa"><i data-lucide="edit"></i></button>
+            <button class="btn btn-primary btn-icon" onclick="openEditLog('${logStr}')" title="Xem Chi Tiết / Sửa"><i data-lucide="edit"></i></button>
             <button class="btn btn-danger btn-icon" onclick="deleteLog('${log.thoi_gian}', '${log.ma_tb}')" title="Xóa"><i data-lucide="trash-2"></i></button>
           </td>
         </tr>`;
@@ -484,73 +525,74 @@
       lucide.createIcons();
     };
 
-    // SỬA NHẬT KÝ
-    function openEdit(tg, maTB, nq, as, gc) {
-        document.getElementById('editMaTB').innerText = maTB; document.getElementById('editThoiGian').value = tg;
-        document.getElementById('editNq').value = nq === 'LỖI' ? 'Lỗi' : 'Đạt'; document.getElementById('editAs').value = as === 'LỖI' ? 'Lỗi' : 'Đạt';
-        document.getElementById('editGc').value = gc !== 'undefined' ? gc : '';
-        document.getElementById('editModal').style.display = 'flex';
+    // Sửa Nhật Ký
+    function openEditLog(logStr) {
+        const log = JSON.parse(decodeURIComponent(logStr));
+        document.getElementById('editMaTB').innerText = log.ma_tb;
+        document.getElementById('editTime').innerText = new Date(log.thoi_gian).toLocaleString('vi-VN');
+        document.getElementById('editNguoiKT').innerText = log.ten_nv;
+        document.getElementById('editImage').src = log.link_anh || 'https://via.placeholder.com/400x200?text=Khong+Co+Anh';
+        document.getElementById('editThoiGian').value = log.thoi_gian;
+        document.getElementById('editNq').value = log.ngoai_quan === 'LỖI' ? 'Lỗi' : 'Đạt';
+        document.getElementById('editAs').value = log.ap_suat === 'LỖI' ? 'Lỗi' : 'Đạt';
+        document.getElementById('editGc').value = log.ghi_chu !== 'undefined' ? log.ghi_chu : '';
+        document.getElementById('editLogModal').style.display = 'flex';
     }
-    async function submitEdit() {
+    async function submitEditLog() {
         const payload = { action: "editLog", thoiGian: document.getElementById('editThoiGian').value, maTB: document.getElementById('editMaTB').innerText, ngoaiQuan: document.getElementById('editNq').value.toUpperCase(), apSuat: document.getElementById('editAs').value.toUpperCase(), ghiChu: document.getElementById('editGc').value };
-        document.getElementById('editModal').style.display='none';
-        showToast('Đang lưu thay đổi...', 'warning');
+        document.getElementById('editLogModal').style.display='none'; showToast('Đang lưu thay đổi...', 'warning');
         await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        showToast("Sửa thành công! Vui lòng làm mới trang.", "success");
-        setTimeout(()=>window.location.reload(), 1500);
+        showToast("Sửa báo cáo thành công! Vui lòng F5 trang.", "success");
     }
 
-    // XÓA NHẬT KÝ
+    // Xóa Nhật Ký
     function deleteLog(tg, maTB) {
-      showDialog("Xác nhận xóa", `Bạn chắc chắn muốn xóa vĩnh viễn bản ghi của ${maTB}?`, false, "", async (res) => {
+      showDialog("Cảnh báo Xóa", `Xóa vĩnh viễn báo cáo của ${maTB}?`, false, "", async (res) => {
           if(res) {
-            showToast('Đang tiến hành xóa...', 'warning');
+            showToast('Đang xóa...', 'warning');
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "deleteLog", thoiGian: tg, maTB: maTB }) });
             globalData.logs = globalData.logs.filter(l => !(l.thoi_gian === tg && l.ma_tb === maTB));
-            renderDashboard(); renderLogs();
-            showToast('Đã xóa thành công!', 'success');
+            renderDashboard(); renderLogs(); showToast('Đã xóa thành công!', 'success');
           }
       });
     }
 
-    // GỬI EMAIL CHỌN LỌC
+    // Gửi Email cho các log đã chọn
     function sendSelectedEmails() {
         const selected = Array.from(document.querySelectorAll('.log-select:checked')).map(cb => JSON.parse(decodeURIComponent(cb.value)));
         if(!selected.length) return showToast("Chọn ít nhất 1 mục để gửi!", "warning");
-        
-        showDialog("Gửi Email Cảnh Báo", `Gửi cảnh báo cho ${selected.length} thiết bị này đến:`, true, globalData.settings.defaultEmail, async (email) => {
+        showDialog("Gửi Email Cảnh Báo", `Gửi cho ${selected.length} thiết bị này đến:`, true, globalData.settings.defaultEmail, async (email) => {
             if(email) {
                 showToast('Đang gửi Email...', 'warning');
                 for(let log of selected) await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendEmails", type: "single", email: email, log: log }) });
-                showToast('Đã gửi xong tất cả email!', 'success');
+                showToast('Gửi hoàn tất!', 'success');
             }
         });
     }
 
-    // GỬI EMAIL BÁO CÁO BẢNG
+    // Xuất Báo cáo nguyên Bảng
     function sendMassEmail() {
         if(!currentFilteredLogs.length) return showToast("Không có dữ liệu!", "warning");
-        showDialog("Gửi Báo Cáo Tổng Hợp", `Hệ thống sẽ đóng gói ${currentFilteredLogs.length} thiết bị đang hiển thị thành 1 báo cáo bảng. Nhập Email nhận:`, true, globalData.settings.defaultEmail, async (email) => {
+        showDialog("Gửi Báo Cáo Bảng", `Đóng gói ${currentFilteredLogs.length} thiết bị đang hiển thị thành bảng. Nhập Email:`, true, globalData.settings.defaultEmail, async (email) => {
             if(email) {
-                let htmlTable = `<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
-                <tr style="background:#0f172a; color:white;"><th>Mã Thiết Bị</th><th>Nhân viên</th><th>Ngày kiểm</th><th>Trạng thái</th><th>Ghi chú</th></tr>`;
+                let htmlTable = `<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;"><tr style="background:#0f172a; color:white;"><th>Mã Thiết Bị</th><th>Nhân viên</th><th>Ngày kiểm</th><th>Trạng thái</th><th>Ghi chú</th></tr>`;
                 currentFilteredLogs.forEach(log => {
                     let st = (log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI') ? "<b style='color:red;'>LỖI</b>" : "<b style='color:green;'>ĐẠT</b>";
                     htmlTable += `<tr><td>${log.ma_tb}</td><td>${log.ten_nv}</td><td>${new Date(log.thoi_gian).toLocaleDateString('vi-VN')}</td><td>${st}</td><td style="color:red;">${log.ghi_chu}</td></tr>`;
                 });
                 showToast('Đang tiến hành gửi báo cáo...', 'warning');
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendEmails", type: "mass", email: email, htmlBody: htmlTable+"</table>" }) });
-                showToast("Đã gửi báo cáo thành công!", "success");
+                showToast("Đã gửi báo cáo bảng thành công!", "success");
             }
         });
     }
 
-    // ================= 4. LƯU CÀI ĐẶT EMAIL =================
+    // ================= 4. CÀI ĐẶT EMAIL =================
     async function saveSettings() {
         const payload = { action: "saveSettings", defaultEmail: document.getElementById('set-email').value, subject: document.getElementById('set-subject').value, template: document.getElementById('set-template').value };
         showToast('Đang lưu cài đặt...', 'warning');
         await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        showToast("Lưu cài đặt Email thành công!", "success");
+        showToast("Lưu Cài đặt Email thành công!", "success");
     }
   </script>
 </body>
