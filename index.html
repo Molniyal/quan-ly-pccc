@@ -1,119 +1,290 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PCCC ERP - Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PCCC Digital ERP</title>
+  
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin:0; display:flex;}
-    .sidebar { width: 260px; height: 100vh; background: #0f172a; color: white; padding: 20px; position: fixed;}
-    .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; color: #cbd5e1; cursor: pointer; border-radius: 8px; margin-bottom: 8px;}
-    .sidebar-item.active, .sidebar-item:hover { background: #2563eb; color: white;}
-    .main-content { margin-left: 260px; flex: 1; padding: 30px; }
-    .view-tab { display: none; }
-    .view-tab.active { display: block; animation: fadeIn 0.3s; }
+    :root {
+        --primary: #2563eb;
+        --sidebar-width: 260px;
+        --sidebar-collapsed-width: 80px;
+    }
+
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin:0; padding:0; display:flex; overflow-x: hidden;}
+    
+    /* ===== SIDEBAR ===== */
+    .sidebar { 
+        width: var(--sidebar-width); 
+        height: 100vh; 
+        background: #0f172a; 
+        color: white; 
+        padding: 20px; 
+        box-sizing:border-box; 
+        position: fixed; 
+        left: 0; 
+        top: 0;
+        transition: all 0.3s ease;
+        z-index: 100;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    /* Trạng thái thu gọn Sidebar */
+    .sidebar.collapsed { width: var(--sidebar-collapsed-width); padding: 20px 10px; }
+    .sidebar.collapsed .hide-on-collapse { display: none; }
+    .sidebar.collapsed h2 { justify-content: center; }
+    .sidebar.collapsed .sidebar-item { justify-content: center; padding: 14px 0; }
+
+    .sidebar h2 { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 20px; white-space: nowrap;}
+    .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; color: #cbd5e1; text-decoration: none; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; white-space: nowrap;}
+    .sidebar-item.active, .sidebar-item:hover { background: var(--primary); color: white;}
+    
+    /* ===== MAIN CONTENT ===== */
+    .main-content { 
+        margin-left: var(--sidebar-width); 
+        width: calc(100% - var(--sidebar-width)); /* Ngăn chặn lấn sang phải */
+        padding: 30px; 
+        height: 100vh; 
+        box-sizing:border-box;
+        transition: all 0.3s ease;
+        overflow-y: auto;
+    }
+
+    /* Trạng thái Main Content khi Sidebar thu gọn */
+    .main-content.expanded {
+        margin-left: var(--sidebar-collapsed-width);
+        width: calc(100% - var(--sidebar-collapsed-width));
+    }
+
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+    .menu-toggle-btn { background: none; border: none; cursor: pointer; color: #0f172a; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 6px;}
+    .menu-toggle-btn:hover { background: #f1f5f9; }
+
+    /* TAB VIEWS */
+    .view-section { display: none; animation: fadeIn 0.3s ease-in-out;}
+    .view-section.active { display: block;}
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);}}
     
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;}
-    .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #2563eb;}
-    .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
+    /* CARDS & TABLES */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;}
+    .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid var(--primary);}
+    .content-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;}
     
-    table { width: 100%; border-collapse: collapse; margin-top: 15px;}
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle;}
-    .badge { padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: bold;}
+    .table-responsive { width: 100%; overflow-x: auto; } /* Giúp bảng có thanh cuộn ngang nếu dài, không phá layout */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 800px;}
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle;}
+    th { background: #f8fafc; color: #475569; font-weight: 600; white-space: nowrap;}
+    
+    /* BADGES & BUTTONS */
+    .badge { padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; white-space: nowrap;}
     .badge-ok { background: #d1fae5; color: #059669;}
     .badge-err { background: #fee2e2; color: #dc2626;}
     
-    .btn { padding: 8px 16px; border:none; border-radius: 8px; cursor: pointer; color:white; font-weight:bold; }
-    .btn-primary { background: #2563eb; }
-    .img-thumb { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; cursor: pointer;}
-    .qr-img { width: 70px; height: 70px; border: 1px solid #ccc; padding: 2px; border-radius: 5px;}
+    .btn { padding: 10px 20px; border:none; border-radius: 8px; cursor: pointer; color:white; font-weight:bold; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;}
+    .btn-primary { background: var(--primary); }
+    .btn-danger { background: #dc2626; }
+    .btn-warning { background: #d97706; }
+    .btn-success { background: #059669; }
     
+    /* ẢNH QR & ẢNH MINH CHỨNG */
+    .qr-canvas { border: 1px solid #cbd5e1; padding: 3px; border-radius: 5px; background: white;}
+    .img-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #ccc; cursor: pointer;}
+    
+    /* BỘ LỌC */
+    .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: #f8fafc; padding: 15px; border-radius: 8px; flex-wrap: wrap;}
+    .filter-bar select, .filter-bar input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; min-width: 200px; flex: 1;}
+    
+    /* LOGIN OVERLAY */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; z-index: 1000;}
-    .modal-content { background: white; padding: 40px; border-radius: 16px; width: 320px; text-align: center;}
-    .form-input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing:border-box;}
+    .modal-content { background: white; padding: 40px; border-radius: 16px; width: 350px; text-align: center;}
+    .form-input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing:border-box;}
+
+    /* CHẾ ĐỘ IN ẤN */
+    #printArea { display: none; }
+    @media print {
+      body { background: white; padding: 0; display: block; overflow: visible;}
+      .sidebar, .main-content, .modal-overlay { display: none !important; }
+      #printArea { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; max-width: 210mm; margin: auto; }
+      .ticket { border: 1px dashed #000; padding: 15px; text-align: center; page-break-inside: avoid; }
+      .ticket img { width: 120px; height: 120px; margin-bottom: 5px;}
+    }
   </style>
 </head>
 <body>
 
+  <div id="printArea"></div>
+
   <div id="loginModal" class="modal-overlay">
     <div class="modal-content">
-      <h2 style="margin-bottom: 20px;"><i data-lucide="shield"></i> ĐĂNG NHẬP ERP</h2>
-      <input type="text" id="maNvLogin" class="form-input" placeholder="Mã Nhân Viên (VD: ADMIN)" style="text-transform: uppercase;">
-      <button class="btn btn-primary" style="width: 100%;" onclick="login()">Đăng Nhập</button>
+      <div style="background: #2563eb; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+        <i data-lucide="shield" style="color: white; width: 30px; height: 30px;"></i>
+      </div>
+      <h2 style="margin-bottom: 25px; color: #0f172a;">ERP LOGIN</h2>
+      <form id="loginForm">
+        <input type="text" id="maNvLogin" class="form-input" placeholder="Mã Nhân Viên (VD: ADMIN)" required>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 16px;">Đăng Nhập</button>
+      </form>
     </div>
   </div>
 
-  <div class="sidebar">
-    <h2 style="margin-bottom: 30px;"><i data-lucide="shield-check"></i> PCCC ERP</h2>
-    <div class="sidebar-item active" onclick="switchTab('dashboard')"><i data-lucide="layout-dashboard"></i> Tổng quan</div>
-    <div class="sidebar-item" onclick="switchTab('locations')"><i data-lucide="map-pin"></i> Vị trí & QR Code</div>
-    <div class="sidebar-item" onclick="switchTab('logs')"><i data-lucide="clipboard-list"></i> Nhật ký kiểm tra</div>
+  <div class="sidebar" id="sidebar">
+    <h2><i data-lucide="shield-check"></i> <span class="hide-on-collapse">PCCC ERP</span></h2>
+    
+    <a class="sidebar-item active" onclick="switchTab('dashboard', this)" title="Tổng quan">
+        <i data-lucide="layout-dashboard"></i> <span class="hide-on-collapse">Tổng quan</span>
+    </a>
+    <a class="sidebar-item" onclick="switchTab('locations', this)" title="Vị trí & QR Code">
+        <i data-lucide="map-pin"></i> <span class="hide-on-collapse">Vị trí & QR Code</span>
+    </a>
+    <a class="sidebar-item" onclick="switchTab('logs', this)" title="Nhật ký kiểm tra">
+        <i data-lucide="clipboard-list"></i> <span class="hide-on-collapse">Nhật ký kiểm tra</span>
+    </a>
+    
     <hr style="border-color: #334155; margin: 20px 0;">
-    <a href="scan.html" target="_blank" style="text-decoration:none;"><div class="sidebar-item"><i data-lucide="smartphone"></i> App Quét Mã</div></a>
-    <a href="print.html" target="_blank" style="text-decoration:none;"><div class="sidebar-item"><i data-lucide="printer"></i> In toàn bộ Tem</div></a>
-    <button class="btn" style="background:#dc2626; width:100%; margin-top:20px;" onclick="logout()">Đăng xuất</button>
+    <a href="scan.html" target="_blank" class="sidebar-item" title="App Quét Mã">
+        <i data-lucide="smartphone"></i> <span class="hide-on-collapse">App Quét Mã</span>
+    </a>
+    
+    <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
+      <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="logout()" title="Đăng xuất">
+          <i data-lucide="log-out"></i> <span class="hide-on-collapse">Đăng xuất</span>
+      </button>
+    </div>
   </div>
 
-  <div class="main-content">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-      <h2 id="pageTitle" style="margin:0;">Bảng Điều Khiển</h2>
-      <div style="text-align: right;"><b id="userName" style="color:#2563eb;"></b><br><span id="userRole" style="font-size:12px; color:#64748b;"></span></div>
+  <div class="main-content" id="mainContent">
+    
+    <div class="header-top">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button class="menu-toggle-btn" id="toggleSidebarBtn"><i data-lucide="menu"></i></button>
+        <h2 id="pageTitle" style="margin: 0; color: #0f172a;">Tổng Quan Thống Kê</h2>
+      </div>
+      <div style="text-align: right;">
+        <b id="userName" style="color: #2563eb; font-size: 16px;">Đang tải...</b><br>
+        <span id="userRole" style="color: #64748b; font-size: 13px;"></span>
+      </div>
     </div>
 
-    <div id="tab-dashboard" class="view-tab active">
+    <div id="view-dashboard" class="view-section active">
       <div class="stats-grid">
-        <div class="stat-card">Tổng số vị trí<h2 id="st-total">0</h2></div>
-        <div class="stat-card" style="border-color:#059669;">Đã kiểm tra<h2 id="st-inspected" style="color:#059669;">0</h2></div>
-        <div class="stat-card" style="border-color:#dc2626;">Bình có lỗi<h2 id="st-errors" style="color:#dc2626;">0</h2></div>
-        <div class="stat-card" style="border-color:#d97706; background:#fffbeb;">QR Cần In Lại<h2 id="st-broken" style="color:#d97706;">0</h2></div>
-      </div>
-      <div class="card">
-        <h3 style="color:#dc2626; margin-top:0;">🚨 Các vị trí hỏng mã QR (Đã được báo cáo)</h3>
-        <table>
-          <thead><tr><th>Mã Thiết Bị</th><th>Xưởng</th><th>Khu Vực</th><th>Thao Tác</th></tr></thead>
-          <tbody id="table-broken"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="tab-locations" class="view-tab">
-      <div class="card">
-        <h3 style="margin-top:0;">📍 Danh sách Vị trí & Mã QR</h3>
-        <table>
-          <thead><tr><th>Hình QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng Thái QR</th></tr></thead>
-          <tbody id="table-locations"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="tab-logs" class="view-tab">
-      <div class="card">
-        <div style="display:flex; gap:15px; margin-bottom:20px; background:#f8fafc; padding:15px; border-radius:8px;">
-          <input type="text" id="searchLog" placeholder="🔍 Tìm Mã bình, Mã NV..." class="form-input" style="margin:0; width:300px;" onkeyup="renderLogs()">
-          <select id="filterLog" class="form-input" style="margin:0; width:200px;" onchange="renderLogs()">
-            <option value="ALL">Tất cả trạng thái</option>
-            <option value="ERR">Chỉ hiển thị bình LỖI</option>
-          </select>
+        <div class="stat-card" style="border-color: #2563eb;">
+          <h4 style="color:#64748b; margin:0 0 10px 0;">Tổng số thiết bị</h4>
+          <p id="st-total" style="font-size:32px; margin:0; font-weight:bold; color:#0f172a;">0</p>
         </div>
-        <table>
-          <thead><tr><th>Thời gian</th><th>NV</th><th>Mã TB</th><th>Ngoại quan</th><th>Áp suất</th><th>Ghi chú</th><th>Ảnh</th></tr></thead>
-          <tbody id="table-logs"></tbody>
-        </table>
+        <div class="stat-card" style="border-color: #059669;">
+          <h4 style="color:#64748b; margin:0 0 10px 0;">Đã kiểm tra (Tháng)</h4>
+          <p id="st-inspected" style="font-size:32px; margin:0; font-weight:bold; color:#059669;">0</p>
+        </div>
+        <div class="stat-card" style="border-color: #dc2626;">
+          <h4 style="color:#dc2626; margin:0 0 10px 0;">Bình CÓ LỖI</h4>
+          <p id="st-errors" style="font-size:32px; margin:0; font-weight:bold; color:#dc2626;">0</p>
+        </div>
+        <div class="stat-card" style="border-color: #d97706; background: #fffbeb;">
+          <h4 style="color:#d97706; margin:0 0 10px 0;">Mã QR Báo Hỏng</h4>
+          <p id="st-brokenQR" style="font-size:32px; margin:0; font-weight:bold; color:#d97706;">0</p>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h3 style="margin-top: 0; color:#dc2626; display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="alert-triangle"></i> Cảnh báo: Vị trí cần thay mã QR gấp
+        </h3>
+        <div class="table-responsive">
+            <table>
+            <thead><tr><th>Mã Thiết Bị</th><th>Xưởng / Khu Vực</th><th>Trạng Thái QR</th><th>Thao Tác</th></tr></thead>
+            <tbody id="dash-broken-table"></tbody>
+            </table>
+        </div>
       </div>
     </div>
+
+    <div id="view-locations" class="view-section">
+      <div class="content-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0;">📍 Danh sách Vị trí & QR Code</h3>
+          <div style="display: flex; gap: 10px;">
+              <button class="btn btn-warning" onclick="printSelected()"><i data-lucide="printer"></i> In mục đã chọn</button>
+              <button class="btn btn-primary" onclick="printAll()"><i data-lucide="printer"></i> In toàn bộ</button>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table>
+            <thead>
+                <tr>
+                <th width="40"><input type="checkbox" id="selectAllQR" onchange="toggleSelectAll(this)"></th>
+                <th width="80">Mã QR</th>
+                <th>Mã Thiết Bị</th>
+                <th>Xưởng</th>
+                <th>Khu Vực</th>
+                <th>Trạng thái Tem</th>
+                <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="locations-table"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-logs" class="view-section">
+      <div class="content-card">
+        
+        <div class="filter-bar">
+          <input type="text" id="filter-search" placeholder="🔍 Tìm theo Mã bình, Nhân viên..." onkeyup="applyFilters()">
+          <select id="filter-status" onchange="applyFilters()">
+            <option value="ALL">Tất cả tình trạng</option>
+            <option value="ERRORS">🚨 Chỉ hiển thị bình BÁO LỖI</option>
+          </select>
+          <button class="btn btn-success" style="margin-left: auto;" onclick="sendMassEmail()"><i data-lucide="mail"></i> Gửi Báo Cáo Lọc Này</button>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+            <thead>
+                <tr>
+                <th>Thời gian</th>
+                <th>Nhân viên</th>
+                <th>Mã Thiết Bị</th>
+                <th>Ngoại quan</th>
+                <th>Áp suất</th>
+                <th>Ghi chú lỗi</th>
+                <th>Ảnh chụp</th>
+                <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="logs-table"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // BẠN DÁN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxJH_M_NsHiwt5yfDblW46eClpwxiuxDKkbERdgx5mCAw-plxwm3RTZI5K0CvbiWjR6Q/exec";
-    // ĐIỀN TÊN MIỀN GITHUB PAGES CỦA BẠN (Để tạo QR)
-    const DOMAIN = "https://molniyal.github.io/quan-ly-pccc/"; 
+    // ==================== CẤU HÌNH HỆ THỐNG ====================
+    // 🔴 BẠN DÁN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkjXp9buzFP7pHOqWCPKwN0_Zj10Tpw9kbvnpAnB2SFAM3pep5UBE27lcmGJlqbmd2AA/exec";
+    // 🔴 ĐIỀN LINK GITHUB PAGES CỦA BẠN VÀO ĐÂY (để tạo hình QR Code):
+    const DOMAIN = "https://molniyal.github.io/quan-ly-pccc/";
 
     let globalData = { locations: [], logs: [] };
+    let currentFilteredLogs = [];
 
     window.onload = () => {
       lucide.createIcons();
+      
+      // Xử lý nút thu gọn/Mở rộng Sidebar
+      document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+          document.getElementById('sidebar').classList.toggle('collapsed');
+          document.getElementById('mainContent').classList.toggle('expanded');
+      });
+
       const savedUser = localStorage.getItem('pccc_admin');
       if(savedUser) {
         document.getElementById('loginModal').style.display = 'none';
@@ -122,22 +293,28 @@
       }
     };
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.view-tab').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      event.currentTarget.classList.add('active');
-      document.getElementById('pageTitle').innerText = tabId === 'dashboard' ? 'Tổng Quan' : (tabId === 'locations' ? 'Vị Trí & QR' : 'Nhật Ký Kiểm Tra');
-    }
-
-    async function login() {
-      const maNv = document.getElementById('maNvLogin').value.toUpperCase();
-      if(!maNv) return alert("Nhập mã nhân viên!");
-      event.target.innerText = "Đang tải dữ liệu...";
-      await fetchData(maNv);
-    }
+    // Form Đăng nhập
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const maNv = document.getElementById('maNvLogin').value.toUpperCase();
+        if(!maNv) return;
+        const btn = e.target.querySelector('button');
+        btn.innerText = "Đang tải dữ liệu...";
+        await fetchData(maNv);
+        btn.innerText = "Đăng Nhập";
+    });
 
     function logout() { localStorage.removeItem('pccc_admin'); window.location.reload(); }
+
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${tabId}`).classList.add('active');
+      if(element) element.classList.add('active');
+      
+      const titles = {'dashboard': 'Tổng Quan Thống Kê', 'locations': 'Quản Lý Vị Trí & Mã QR', 'logs': 'Nhật Ký & Báo Cáo Kiểm Tra'};
+      document.getElementById('pageTitle').innerText = titles[tabId];
+    }
 
     async function fetchData(maNv) {
       try {
@@ -148,13 +325,13 @@
         
         localStorage.setItem('pccc_admin', maNv);
         document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('userName').innerText = "Xin chào, " + maNv;
-        document.getElementById('userRole').innerText = data.role === "ADMIN" ? "Quyền: Quản Trị Viên" : `Quyền: Quản lý ${data.xuong}`;
+        document.getElementById('userName').innerText = "Xin chào, " + data.name;
+        document.getElementById('userRole').innerText = data.role === "ADMIN" ? "Quản Trị Viên (Toàn quyền)" : `Quản lý: ${data.xuong}`;
         
         globalData = data;
         renderDashboard();
         renderLocations();
-        renderLogs();
+        applyFilters();
       } catch (err) {
         alert(err.message);
         localStorage.removeItem('pccc_admin');
@@ -162,6 +339,7 @@
       }
     }
 
+    // ================= 1. RENDER TỔNG QUAN =================
     function renderDashboard() {
       const errLogs = globalData.logs.filter(i => i.ngoai_quan === 'LỖI' || i.ap_suat === 'LỖI');
       const brokenQRs = globalData.locations.filter(l => l.qr_broken);
@@ -169,40 +347,143 @@
       document.getElementById('st-total').innerText = globalData.locations.length;
       document.getElementById('st-inspected').innerText = globalData.logs.length;
       document.getElementById('st-errors').innerText = errLogs.length;
-      document.getElementById('st-broken').innerText = brokenQRs.length;
+      document.getElementById('st-brokenQR').innerText = brokenQRs.length;
 
-      const tBroken = document.getElementById('table-broken');
-      tBroken.innerHTML = brokenQRs.length ? brokenQRs.map(l => `<tr><td><b>${l.ma_tb}</b></td><td>${l.xuong}</td><td>${l.khu_vuc}</td><td><a href="print.html?id=${l.ma_tb}" target="_blank" class="btn btn-primary" style="text-decoration:none; font-size:12px;">In Tem Mới</a></td></tr>`).join('') : '<tr><td colspan="4">Không có mã QR nào hỏng.</td></tr>';
+      const tBroken = document.getElementById('dash-broken-table');
+      tBroken.innerHTML = brokenQRs.length ? brokenQRs.map(l => `<tr>
+        <td><b>${l.ma_tb}</b></td><td>${l.xuong} - ${l.khu_vuc}</td>
+        <td><span class="badge badge-err">Bị mờ/rách (Cần thay)</span></td>
+        <td><button class="btn btn-warning" onclick="printSingle('${l.ma_tb}')"><i data-lucide="printer"></i> In Tem Mới</button></td>
+      </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;">✅ Mọi mã QR đều đang hoạt động tốt.</td></tr>';
+      lucide.createIcons();
     }
 
+    // ================= 2. RENDER VỊ TRÍ & QR =================
     function renderLocations() {
-      const tbody = document.getElementById('table-locations');
+      const tbody = document.getElementById('locations-table');
       tbody.innerHTML = globalData.locations.map(l => {
-        const qrUrl = `https://quickchart.io/qr?size=80&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + l.ma_tb)}`;
-        const status = l.qr_broken ? `<span class="badge badge-err">Cần in lại</span>` : `<span class="badge badge-ok">Tốt</span>`;
-        return `<tr><td><img src="${qrUrl}" class="qr-img"></td><td><b>${l.ma_tb}</b></td><td>${l.xuong}</td><td>${l.khu_vuc}</td><td>${status}</td></tr>`;
+        // Dùng API QuickChart để xuất hình ảnh thật, không bị lỗi khi chuyển Tab
+        const qrUrl = `https://quickchart.io/qr?size=60&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + l.ma_tb)}`;
+        const qrStatus = l.qr_broken ? `<span class="badge badge-err">⚠️ Đã Báo Hỏng</span>` : `<span class="badge badge-ok">✅ Tốt</span>`;
+
+        return `<tr>
+            <td><input type="checkbox" class="qr-select" value="${l.ma_tb}"></td>
+            <td><img src="${qrUrl}" class="qr-canvas"></td>
+            <td><strong style="color:#0f172a; font-size: 16px;">${l.ma_tb}</strong></td>
+            <td>${l.xuong}</td><td>${l.khu_vuc}</td><td>${qrStatus}</td>
+            <td><button class="btn btn-primary" onclick="printSingle('${l.ma_tb}')" title="In tem này"><i data-lucide="printer"></i> In</button></td>
+        </tr>`;
       }).join('');
+      lucide.createIcons();
     }
 
-    window.renderLogs = function() {
-      const search = document.getElementById('searchLog').value.toLowerCase();
-      const filter = document.getElementById('filterLog').value;
+    function toggleSelectAll(source) {
+        document.querySelectorAll('.qr-select').forEach(cb => cb.checked = source.checked);
+    }
+
+    // Lệnh In
+    function printSingle(id) { executePrint([id]); }
+    function printAll() { executePrint(globalData.locations.map(l => l.ma_tb)); }
+    function printSelected() {
+        let selected = Array.from(document.querySelectorAll('.qr-select:checked')).map(cb => cb.value);
+        if(selected.length === 0) return alert("Vui lòng chọn ít nhất 1 vị trí (tích vào ô vuông bên trái) để in!");
+        executePrint(selected);
+    }
+
+    function executePrint(idsToPrint) {
+        const area = document.getElementById('printArea');
+        const list = globalData.locations.filter(l => idsToPrint.includes(l.ma_tb));
+        area.innerHTML = list.map(loc => {
+          const qrUrl = `https://quickchart.io/qr?size=150&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + loc.ma_tb)}`;
+          return `<div class="ticket">
+              <img src="${qrUrl}">
+              <h3 style="margin:5px 0;">${loc.ma_tb}</h3>
+              <p style="margin:0; font-size:12px; color:#555;">${loc.xuong}</p>
+            </div>`;
+        }).join('');
+        window.print();
+    }
+
+    // ================= 3. RENDER NHẬT KÝ & LỌC =================
+    window.applyFilters = () => {
+      const searchTxt = document.getElementById('filter-search').value.toLowerCase();
+      const statusFilter = document.getElementById('filter-status').value;
       
-      const filtered = globalData.logs.filter(log => {
-        const matchSearch = log.ma_tb.toLowerCase().includes(search) || log.ma_nv.toLowerCase().includes(search);
-        const isErr = log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI';
-        const matchStatus = filter === 'ALL' ? true : isErr;
+      currentFilteredLogs = globalData.logs.filter(log => {
+        const matchSearch = log.ma_tb.toLowerCase().includes(searchTxt) || (log.ten_nv && log.ten_nv.toLowerCase().includes(searchTxt));
+        let isErr = (log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI');
+        let matchStatus = statusFilter === 'ALL' ? true : isErr;
         return matchSearch && matchStatus;
       });
 
-      document.getElementById('table-logs').innerHTML = filtered.map(log => {
-        const nq = log.ngoai_quan === 'LỖI' ? '<span class="badge badge-err">Lỗi</span>' : '<span class="badge badge-ok">Đạt</span>';
-        const as = log.ap_suat === 'LỖI' ? '<span class="badge badge-err">Lỗi</span>' : '<span class="badge badge-ok">Đạt</span>';
-        return `<tr><td style="font-size:13px;">${new Date(log.thoi_gian).toLocaleString('vi-VN')}</td><td><b>${log.ma_nv}</b></td><td><b>${log.ma_tb}</b></td><td>${nq}</td><td>${as}</td><td style="color:#dc2626; font-size:13px;">${log.ghi_chu}</td><td><a href="${log.link_anh}" target="_blank"><img src="${log.link_anh}" class="img-thumb"></a></td></tr>`;
+      const tbody = document.getElementById('logs-table');
+      if (currentFilteredLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px;">Không có dữ liệu phù hợp.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = currentFilteredLogs.map(log => {
+        let badNgoaiQuan = log.ngoai_quan === 'LỖI' ? `<span class="badge badge-err">Lỗi</span>` : `<span class="badge badge-ok">Đạt</span>`;
+        let badApSuat = log.ap_suat === 'LỖI' ? `<span class="badge badge-err">Lỗi</span>` : `<span class="badge badge-ok">Đạt</span>`;
+        const isErr = log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI';
+        
+        // Nút gửi email đơn lẻ nếu có lỗi
+        const mailBtn = isErr ? `<button class="btn btn-warning" style="font-size:11px; padding: 5px 10px;" onclick="sendSingleEmail('${log.ma_tb}', '${log.ten_nv}', '${log.ghi_chu}')"><i data-lucide="mail"></i> Email</button>` : '';
+
+        return `<tr>
+          <td style="font-size: 13px; color:#475569;">${new Date(log.thoi_gian).toLocaleString('vi-VN')}</td>
+          <td><b>${log.ten_nv}</b></td>
+          <td><strong>${log.ma_tb}</strong></td>
+          <td>${badNgoaiQuan}</td><td>${badApSuat}</td>
+          <td style="color:#dc2626; font-size: 13px; max-width: 200px;">${log.ghi_chu || ''}</td>
+          <td>${log.link_anh ? `<img src="${log.link_anh}" class="img-thumb" onclick="window.open('${log.link_anh}')" title="Xem ảnh lớn">` : ''}</td>
+          <td>${mailBtn}</td>
+        </tr>`;
       }).join('');
+      lucide.createIcons();
+    };
+
+    // ================= EMAIL ACTIONS =================
+    async function sendSingleEmail(maTB, tenNV, ghiChu) {
+        let email = prompt(`Nhập Email quản lý để gửi báo lỗi bình ${maTB}:`, "hse@congty.com");
+        if(!email) return;
+        
+        const originalText = event.currentTarget.innerHTML;
+        event.currentTarget.innerText = "Đang gửi...";
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "sendAlertEmail", email: email, maTB: maTB, tenNV: tenNV, ghiChu: ghiChu })
+        });
+        alert("✅ Đã gửi email cảnh báo!");
+        event.currentTarget.innerHTML = originalText;
+    }
+
+    async function sendMassEmail() {
+        if(currentFilteredLogs.length === 0) return alert("Không có dữ liệu nào để gửi!");
+        let email = prompt(`Hệ thống sẽ tổng hợp ${currentFilteredLogs.length} thiết bị đang hiển thị vào 1 báo cáo.\nNhập Email người nhận (Giám đốc / HSE):`, "giamdoc@congty.com");
+        if(!email) return;
+
+        let htmlTable = `<h2 style="font-family: Arial; color: #0f172a;">BÁO CÁO TỔNG HỢP KIỂM TRA PCCC</h2>
+          <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%; text-align: left; font-family: Arial;">
+            <tr style="background-color: #0f172a; color: white;"><th>Mã Thiết Bị</th><th>Nhân viên KT</th><th>Ngày kiểm</th><th>Tình trạng</th><th>Ghi chú</th></tr>`;
+        
+        currentFilteredLogs.forEach(log => {
+            let st = (log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI') ? "<strong style='color:red;'>CÓ LỖI</strong>" : "<strong style='color:green;'>ĐẠT</strong>";
+            htmlTable += `<tr><td><b>${log.ma_tb}</b></td><td>${log.ten_nv}</td><td>${new Date(log.thoi_gian).toLocaleDateString('vi-VN')}</td><td>${st}</td><td style="color:red;">${log.ghi_chu}</td></tr>`;
+        });
+        htmlTable += `</table><p>Được tạo tự động từ hệ thống PCCC Digital ERP.</p>`;
+
+        document.getElementById('toggleSidebarBtn').innerText = '⏳'; // Fake loading state indicator
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "sendMassEmail", email: email, htmlBody: htmlTable })
+            });
+            alert("✅ Đã gửi Báo cáo tổng hợp thành công!");
+        } catch(e) { alert("❌ Lỗi gửi mail mạng!"); }
+        document.getElementById('toggleSidebarBtn').innerHTML = '<i data-lucide="menu"></i>';
+        lucide.createIcons();
     }
   </script>
 </body>
-
 </html>
-
