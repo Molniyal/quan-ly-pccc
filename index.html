@@ -6,16 +6,25 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* CSS CỐT LÕI (GIỮ NGUYÊN) */
-    :root { --primary: #2563eb; --sidebar-width: 260px; }
+    :root { --primary: #2563eb; --sidebar-width: 260px; --sidebar-collapsed: 80px;}
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin:0; padding:0; display:flex; overflow-x: hidden;}
-    .sidebar { width: var(--sidebar-width); height: 100vh; background: #0f172a; color: white; padding: 20px; box-sizing:border-box; position: fixed; left: 0; top: 0; z-index: 100; overflow-y: auto;}
-    .sidebar h2 { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 20px;}
-    .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; color: #cbd5e1; cursor: pointer; border-radius: 8px; margin-bottom: 8px;}
+    
+    .sidebar { width: var(--sidebar-width); height: 100vh; background: #0f172a; color: white; padding: 20px; box-sizing:border-box; position: fixed; left: 0; top: 0; z-index: 100; transition: 0.3s; overflow-x: hidden;}
+    .sidebar.collapsed { width: var(--sidebar-collapsed); padding: 20px 10px;}
+    .sidebar.collapsed .hide-text { display: none; }
+    .sidebar.collapsed h2 { justify-content: center; }
+    .sidebar.collapsed .sidebar-item { justify-content: center; padding: 14px 0; }
+    
+    .sidebar h2 { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; font-size: 20px; white-space: nowrap;}
+    .sidebar-item { display: flex; align-items: center; gap: 12px; padding: 14px; color: #cbd5e1; cursor: pointer; border-radius: 8px; margin-bottom: 8px; white-space: nowrap;}
     .sidebar-item.active, .sidebar-item:hover { background: var(--primary); color: white;}
-    .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 30px; box-sizing:border-box; overflow-y: auto; height: 100vh;}
+    
+    .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 30px; box-sizing:border-box; height: 100vh; overflow-y: auto; transition: 0.3s;}
+    .main-content.expanded { margin-left: var(--sidebar-collapsed); width: calc(100% - var(--sidebar-collapsed));}
     
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+    .menu-btn { background: none; border: none; cursor: pointer; padding: 5px;}
+    
     .view-section { display: none; animation: fadeIn 0.3s ease;}
     .view-section.active { display: block;}
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);}}
@@ -27,17 +36,15 @@
     .table-responsive { width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 800px;}
     th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: middle;}
-    th { background: #f8fafc; color: #475569; font-weight: 600;}
+    th { background: #f8fafc; color: #475569; font-weight: 600; white-space: nowrap;}
     
     .badge { padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; white-space: nowrap;}
     .badge-ok { background: #d1fae5; color: #059669;}
     .badge-err { background: #fee2e2; color: #dc2626;}
     
     .btn { padding: 8px 16px; border:none; border-radius: 8px; cursor: pointer; color:white; font-weight:bold; display: inline-flex; align-items: center; gap: 6px;}
-    .btn-primary { background: var(--primary); }
-    .btn-danger { background: #dc2626; }
-    .btn-warning { background: #d97706; }
-    .btn-success { background: #059669; }
+    .btn-primary { background: var(--primary); } .btn-danger { background: #dc2626; }
+    .btn-warning { background: #d97706; } .btn-success { background: #059669; }
     .btn-icon { padding: 6px; border-radius: 6px; }
     
     .filter-bar { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: #f8fafc; padding: 15px; border-radius: 8px; flex-wrap: wrap;}
@@ -47,8 +54,8 @@
     .modal-content { background: white; padding: 40px; border-radius: 16px; width: 350px; text-align: center;}
     .form-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing:border-box;}
 
-    /* BIỂU ĐỒ */
-    .chart-container { position: relative; height: 300px; width: 100%; }
+    .chart-container { position: relative; height: 350px; width: 100%; }
+    .img-thumb { width: 50px; height: 50px; border-radius: 8px; object-fit: cover;}
 
     #printArea { display: none; }
     @media print {
@@ -65,7 +72,7 @@
 
   <div id="loginModal" class="modal-overlay">
     <div class="modal-content">
-      <div style="background: #2563eb; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;"><i data-lucide="shield" style="color: white; width: 30px; height: 30px;"></i></div>
+      <div style="background:#2563eb; width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;"><i data-lucide="shield" style="color:white; width:30px; height:30px;"></i></div>
       <h2 style="margin-bottom: 25px; color: #0f172a;">HỆ THỐNG ERP</h2>
       <form id="loginForm">
         <input type="text" id="maNvLogin" class="form-input" placeholder="Mã Nhân Viên (VD: ADMIN)" required>
@@ -76,20 +83,23 @@
   </div>
 
   <div class="sidebar" id="sidebar">
-    <h2><i data-lucide="shield-check"></i> PCCC ERP</h2>
-    <div class="sidebar-item active" onclick="switchTab('dashboard', this)"><i data-lucide="layout-dashboard"></i> Tổng quan</div>
-    <div class="sidebar-item" onclick="switchTab('locations', this)"><i data-lucide="map-pin"></i> Vị trí & QR Code</div>
-    <div class="sidebar-item" onclick="switchTab('logs', this)"><i data-lucide="clipboard-list"></i> Nhật ký kiểm tra</div>
+    <h2><i data-lucide="shield-check"></i> <span class="hide-text">PCCC ERP</span></h2>
+    <div class="sidebar-item active" onclick="switchTab('dashboard', this)"><i data-lucide="layout-dashboard"></i> <span class="hide-text">Tổng quan</span></div>
+    <div class="sidebar-item" onclick="switchTab('locations', this)"><i data-lucide="map-pin"></i> <span class="hide-text">Vị trí & QR Code</span></div>
+    <div class="sidebar-item" onclick="switchTab('logs', this)"><i data-lucide="clipboard-list"></i> <span class="hide-text">Nhật ký kiểm tra</span></div>
     <hr style="border-color: #334155; margin: 20px 0;">
-    <a href="scan.html" target="_blank" class="sidebar-item" style="text-decoration: none;"><i data-lucide="smartphone"></i> App Quét Mã</a>
+    <a href="scan.html" target="_blank" class="sidebar-item" style="text-decoration: none;"><i data-lucide="smartphone"></i> <span class="hide-text">App Quét Mã</span></a>
     <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
-      <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="logout()"><i data-lucide="log-out"></i> Đăng xuất</button>
+      <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="logout()"><i data-lucide="log-out"></i> <span class="hide-text">Đăng xuất</span></button>
     </div>
   </div>
 
   <div class="main-content" id="mainContent">
     <div class="header-top">
-      <h2 id="pageTitle" style="margin: 0; color: #0f172a;">Tổng Quan Thống Kê</h2>
+      <div style="display:flex; align-items:center; gap:15px;">
+        <button class="menu-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+        <h2 id="pageTitle" style="margin: 0; color: #0f172a;">Tổng Quan Thống Kê</h2>
+      </div>
       <div style="text-align: right;"><b id="userName" style="color: #2563eb; font-size: 16px;">Đang tải...</b><br><span id="userRole" style="color: #64748b; font-size: 13px;"></span></div>
     </div>
 
@@ -100,26 +110,14 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
-          <h4 style="color:#64748b; margin:0 0 10px 0;">Tổng số thiết bị</h4>
-          <p id="st-total" style="font-size:32px; margin:0; font-weight:bold; color:#0f172a;">0</p>
-        </div>
-        <div class="stat-card" style="border-color: #059669;">
-          <h4 style="color:#64748b; margin:0 0 10px 0;">Đã kiểm tra (Theo tháng)</h4>
-          <p id="st-inspected" style="font-size:32px; margin:0; font-weight:bold; color:#059669;">0</p>
-        </div>
-        <div class="stat-card" style="border-color: #dc2626;">
-          <h4 style="color:#dc2626; margin:0 0 10px 0;">Bình có lỗi (Theo tháng)</h4>
-          <p id="st-errors" style="font-size:32px; margin:0; font-weight:bold; color:#dc2626;">0</p>
-        </div>
-        <div class="stat-card" style="border-color: #d97706; background: #fffbeb;">
-          <h4 style="color:#d97706; margin:0 0 10px 0;">Mã QR Báo Hỏng</h4>
-          <p id="st-brokenQR" style="font-size:32px; margin:0; font-weight:bold; color:#d97706;">0</p>
-        </div>
+        <div class="stat-card">Tổng số thiết bị<p id="st-total" style="font-size:32px; margin:0; font-weight:bold; color:#0f172a;">0</p></div>
+        <div class="stat-card" style="border-color: #059669;">Đã kiểm tra (Tháng)<p id="st-inspected" style="font-size:32px; margin:0; font-weight:bold; color:#059669;">0</p></div>
+        <div class="stat-card" style="border-color: #dc2626;">Bình có lỗi (Tháng)<p id="st-errors" style="font-size:32px; margin:0; font-weight:bold; color:#dc2626;">0</p></div>
+        <div class="stat-card" style="border-color: #d97706; background: #fffbeb;">Mã QR Hỏng<p id="st-brokenQR" style="font-size:32px; margin:0; font-weight:bold; color:#d97706;">0</p></div>
       </div>
 
       <div class="content-card">
-        <h3 style="margin-top: 0; color:#0f172a;">📊 Tỉ lệ hoàn thành kiểm tra theo xưởng</h3>
+        <h3 style="margin-top: 0; color:#0f172a;">📊 Tỉ lệ kiểm tra theo Xưởng (Trong tháng)</h3>
         <div class="chart-container"><canvas id="progressChart"></canvas></div>
       </div>
 
@@ -148,7 +146,7 @@
             <table>
             <thead><tr>
                 <th width="40"><input type="checkbox" id="selectAllQR" onchange="toggleSelectAll(this)"></th>
-                <th width="70">Hình QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng thái Tem</th><th>Thao tác</th>
+                <th width="70">Hình QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng thái</th><th>Thao tác</th>
             </tr></thead>
             <tbody id="locations-table"></tbody>
             </table>
@@ -163,27 +161,29 @@
           <select id="logXuong" onchange="renderLogs()"><option value="ALL">Tất cả Xưởng</option></select>
           <select id="logStatus" onchange="renderLogs()">
             <option value="ALL">Tất cả trạng thái</option>
-            <option value="ERRORS">🚨 Chỉ bình CÓ LỖI</option>
+            <option value="ERRORS">🚨 Chỉ hiển thị LỖI</option>
           </select>
-          <input type="text" id="logSearch" placeholder="Tìm mã, nhân viên..." onkeyup="renderLogs()">
+          <input type="text" id="logSearch" placeholder="Tìm mã TB, Tên NV..." onkeyup="renderLogs()">
           <button class="btn btn-success" style="margin-left: auto;" onclick="sendMassEmail()"><i data-lucide="mail"></i> Gửi Báo Cáo</button>
         </div>
         <div class="table-responsive">
             <table>
-            <thead><tr><th>Thời gian</th><th>Xưởng</th><th>Mã TB</th><th>Nhân viên</th><th>Trạng thái</th><th>Ghi chú</th><th>Ảnh</th><th>Hành động</th></tr></thead>
+            <thead><tr><th>Thời gian</th><th>Xưởng</th><th>Mã TB</th><th>Người KT</th><th>Trạng thái</th><th>Ghi chú</th><th>Ảnh</th><th>Hành động</th></tr></thead>
             <tbody id="logs-table"></tbody>
             </table>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-    // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUazsL_5SRYhEFKrxFYfhv8B4cyz2Purz7kcdKtOZ-cu91aF9wuo240GSLylR-QX0wfQ/exec";
-    // 🔴 2. ĐIỀN LINK GITHUB PAGES VÀO ĐÂY:
-    const DOMAIN = "https://molniyal.github.io/quan-ly-pccc/";
+    // ==========================================
+    // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI CỦA BẠN VÀO ĐÂY:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyy1JXchC7fURM9sowMFCNGq0unWspwLQXRg-3u7tkmZ-QBownkyDdPxyAg-U-G3_D_rw/exec";
+    
+    // 🔴 2. ĐIỀN TÊN MIỀN GITHUB PAGES VÀO ĐÂY:
+    const DOMAIN = "https://molniyal.github.io/quan-ly-pccc";
+    // ==========================================
 
     let globalData = { locations: [], logs: [] };
     let currentFilteredLogs = [];
@@ -201,6 +201,11 @@
       }
     };
 
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    }
+
     function initDateFilters() {
       const d = new Date();
       let mHtml = '', yHtml = '';
@@ -210,7 +215,6 @@
       document.getElementById('dashYear').innerHTML = yHtml;
     }
 
-    // ================= LOGIN =================
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const maNv = document.getElementById('maNvLogin').value.trim();
@@ -228,13 +232,14 @@
       document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
       document.getElementById(`view-${tabId}`).classList.add('active');
       if(element) element.classList.add('active');
+      const t = {'dashboard': 'Tổng Quan', 'locations': 'Quản Lý Vị Trí', 'logs': 'Nhật Ký & Báo Cáo'};
+      document.getElementById('pageTitle').innerText = t[tabId];
     }
 
     async function fetchData(maNv, pass) {
       try {
         const res = await fetch(`${SCRIPT_URL}?action=getDashboardData&maNV=${maNv}&matKhau=${pass}`);
         const data = await res.json();
-        
         if(data.status === "error") throw new Error(data.message);
         
         localStorage.setItem('pccc_session', JSON.stringify({ma: maNv, pass: pass}));
@@ -255,7 +260,6 @@
     }
 
     function populateDropdowns() {
-      // Lấy danh sách xưởng duy nhất
       const xuongs = [...new Set(globalData.locations.map(l => l.xuong))].sort();
       let html = '<option value="ALL">Tất cả Xưởng</option>';
       xuongs.forEach(x => html += `<option value="${x}">${x}</option>`);
@@ -263,18 +267,16 @@
       document.getElementById('logXuong').innerHTML = html;
     }
 
-    // ================= 1. DASHBOARD & BIỂU ĐỒ =================
+    // ================= 1. TAB DASHBOARD =================
     function renderDashboard() {
       const month = parseInt(document.getElementById('dashMonth').value);
       const year = parseInt(document.getElementById('dashYear').value);
 
-      // Lọc log theo tháng năm đã chọn
       const logsInMonth = globalData.logs.filter(log => {
         const d = new Date(log.thoi_gian);
         return d.getMonth() + 1 === month && d.getFullYear() === year;
       });
 
-      // Xử lý đếm thiết bị (1 bình kiểm nhiều lần trong tháng chỉ tính 1)
       const uniqueInspectedTB = [...new Set(logsInMonth.map(l => l.ma_tb))];
       const errLogs = logsInMonth.filter(i => i.ngoai_quan === 'LỖI' || i.ap_suat === 'LỖI');
       const brokenQRs = globalData.locations.filter(l => l.qr_broken);
@@ -284,13 +286,12 @@
       document.getElementById('st-errors').innerText = errLogs.length;
       document.getElementById('st-brokenQR').innerText = brokenQRs.length;
 
-      // Render bảng QR hỏng
       const tBroken = document.getElementById('dash-broken-table');
       tBroken.innerHTML = brokenQRs.length ? brokenQRs.map(l => `<tr>
         <td><b>${l.ma_tb}</b></td><td>${l.xuong}</td>
         <td>
           <button class="btn btn-warning btn-icon" onclick="printSingle('${l.ma_tb}')" title="In Tem"><i data-lucide="printer"></i></button>
-          <button class="btn btn-success btn-icon" onclick="fixQR('${l.ma_tb}')" title="Đã thay xong (Bỏ báo hỏng)"><i data-lucide="check-circle"></i></button>
+          <button class="btn btn-success btn-icon" onclick="fixQR('${l.ma_tb}')" title="Bỏ báo hỏng"><i data-lucide="check-circle"></i></button>
         </td>
       </tr>`).join('') : '<tr><td colspan="3">Không có mã QR hỏng.</td></tr>';
 
@@ -299,9 +300,8 @@
     }
 
     async function fixQR(maTB) {
-      if(!confirm(`Xác nhận đã dán tem QR mới cho bình ${maTB}?`)) return;
+      if(!confirm(`Xác nhận đã thay tem QR mới cho bình ${maTB}?`)) return;
       await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "fixQR", maTB: maTB }) });
-      // Xóa ở frontend cho nhanh
       globalData.locations.find(l => l.ma_tb === maTB).qr_broken = false;
       renderDashboard(); renderLocations();
     }
@@ -313,8 +313,6 @@
       xuongs.forEach(x => {
         const tbOfXuong = globalData.locations.filter(l => l.xuong === x).map(l => l.ma_tb);
         totalPerXuong.push(tbOfXuong.length);
-        
-        // Đếm xem trong mảng các bình đã kiểm tra (unique) có bao nhiêu bình thuộc xưởng này
         const ins = uniqueInspectedTB.filter(tb => tbOfXuong.includes(tb)).length;
         inspectedPerXuong.push(ins);
       });
@@ -326,7 +324,7 @@
         data: {
           labels: xuongs,
           datasets: [
-            { label: 'Tổng số bình', data: totalPerXuong, backgroundColor: '#cbd5e1' },
+            { label: 'Tổng số thiết bị', data: totalPerXuong, backgroundColor: '#cbd5e1' },
             { label: 'Đã kiểm tra', data: inspectedPerXuong, backgroundColor: '#059669' }
           ]
         },
@@ -334,7 +332,7 @@
       });
     }
 
-    // ================= 2. VỊ TRÍ =================
+    // ================= 2. TAB VỊ TRÍ =================
     let currentFilteredLocations = [];
     function renderLocations() {
       const search = document.getElementById('locSearch').value.toLowerCase();
@@ -375,17 +373,19 @@
         window.print();
     }
 
-    // ================= 3. NHẬT KÝ & CRUD =================
+    // ================= 3. TAB NHẬT KÝ =================
     window.renderLogs = function() {
-      const date = document.getElementById('logDate').value; // YYYY-MM-DD
+      const date = document.getElementById('logDate').value; 
       const xuong = document.getElementById('logXuong').value;
       const status = document.getElementById('logStatus').value;
       const search = document.getElementById('logSearch').value.toLowerCase();
 
       currentFilteredLogs = globalData.logs.filter(log => {
-        // Tìm xưởng của log này
         const locInfo = globalData.locations.find(l => l.ma_tb === log.ma_tb) || {xuong: 'N/A'};
-        const logDateStr = new Date(log.thoi_gian).toISOString().split('T')[0];
+        
+        // Cắt ngày tháng chuẩn xác để so sánh (YYYY-MM-DD)
+        const d = new Date(log.thoi_gian);
+        const logDateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
         const matchDate = !date || logDateStr === date;
         const matchXuong = xuong === 'ALL' || locInfo.xuong === xuong;
@@ -400,7 +400,7 @@
       tbody.innerHTML = currentFilteredLogs.map(log => {
         const locInfo = globalData.locations.find(l => l.ma_tb === log.ma_tb) || {xuong: '?'};
         const isErr = log.ngoai_quan === 'LỖI' || log.ap_suat === 'LỖI';
-        const stUI = isErr ? `<span class="badge badge-err">CÓ LỖI</span>` : `<span class="badge badge-ok">ĐẠT</span>`;
+        const stUI = isErr ? `<span class="badge badge-err">LỖI</span>` : `<span class="badge badge-ok">ĐẠT</span>`;
         
         return `<tr>
           <td style="font-size:13px;">${new Date(log.thoi_gian).toLocaleString('vi-VN')}</td>
@@ -408,8 +408,8 @@
           <td>${stUI}</td><td style="color:#dc2626; font-size:13px;">${log.ghi_chu || ''}</td>
           <td>${log.link_anh ? `<a href="${log.link_anh}" target="_blank"><img src="${log.link_anh}" class="img-thumb"></a>` : ''}</td>
           <td>
-            <button class="btn btn-danger btn-icon" onclick="deleteLog('${log.thoi_gian}', '${log.ma_tb}')" title="Xóa bản ghi"><i data-lucide="trash-2"></i></button>
-            ${isErr ? `<button class="btn btn-warning btn-icon" onclick="sendSingleEmail('${log.ma_tb}', '${log.ten_nv}', '${log.ghi_chu}')" title="Email báo lỗi"><i data-lucide="mail"></i></button>` : ''}
+            <button class="btn btn-danger btn-icon" onclick="deleteLog('${log.thoi_gian}', '${log.ma_tb}')" title="Xóa"><i data-lucide="trash-2"></i></button>
+            ${isErr ? `<button class="btn btn-warning btn-icon" onclick="sendSingleEmail('${log.ma_tb}', '${log.ten_nv}', '${log.ghi_chu}')" title="Gửi Mail"><i data-lucide="mail"></i></button>` : ''}
           </td>
         </tr>`;
       }).join('');
@@ -417,11 +417,10 @@
     };
 
     async function deleteLog(thoiGian, maTB) {
-      if(!confirm(`Xác nhận XÓA vĩnh viễn nhật ký của bình ${maTB}?`)) return;
+      if(!confirm(`Xác nhận XÓA vĩnh viễn nhật ký này?`)) return;
       document.body.style.cursor = 'wait';
       try {
         await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "deleteLog", thoiGian: thoiGian, maTB: maTB }) });
-        // Xóa tạm trên Frontend để UI cập nhật ngay lập tức
         globalData.logs = globalData.logs.filter(l => !(l.thoi_gian === thoiGian && l.ma_tb === maTB));
         renderDashboard(); renderLogs();
         alert("Đã xóa thành công!");
