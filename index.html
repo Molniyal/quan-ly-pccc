@@ -266,13 +266,15 @@
       margin: 0;
     }
 
-    /* uninspected list for user */
+    /* uninspected list for user - with scroll limit */
     .uninspected-list {
       background: white;
       border-radius: 24px;
       padding: 20px;
       border: 1px solid var(--card-border);
       box-shadow: var(--card-shadow);
+      max-height: 400px;
+      overflow-y: auto;
     }
     .uninspected-item {
       display: flex;
@@ -847,7 +849,7 @@
   <script>
     // ==========================================
     // CONFIGURATION
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeAKJLBBEEYWhwV9e-1y2m9FNlxf3pzhtnj6bda7niJLsuQEFKA7eBZhSRc6XxMdpeTQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt5ycrVWOoTHbewMe1PBOvqFbfvPo05qb6QCSaVBwe6NZZXWZ84jAifbwKh0ghCqetoA/exec";
     const DOMAIN = "https://molniyal.github.io/quan-ly-pccc";
     // ==========================================
 
@@ -972,7 +974,7 @@
         items.push({ id: 'settings', icon: 'settings', label: 'Cài đặt Email' });
       }
 
-      // External scan link: only Admin and Manager? According to request, user should not see it. We'll hide for User.
+      // External scan link: only Admin and Manager (user không thấy)
       if (role !== 'USER') {
         items.push({ divider: true });
         items.push({ id: 'scan', icon: 'smartphone', label: 'App Quét Mã', external: 'scan.html' });
@@ -1047,7 +1049,7 @@
       const brokenQRs = globalData.locations.filter(l => l.qr_broken);
 
       if (role === 'USER') {
-        // For User: show simple stats + list of uninspected locations
+        // For User: show simple stats + list of uninspected locations (with scroll)
         const uninspected = globalData.locations.filter(loc => !uniqueInspectedTB.includes(loc.ma_tb));
         let html = `
           <div class="stats-grid">
@@ -1303,7 +1305,7 @@
 
       const isAdmin = globalData.role === 'ADMIN';
       const isManager = globalData.role === 'MANAGER';
-      // Action buttons: Admin sees email and export; Manager maybe sees export only? We'll keep export for all.
+      // Action buttons: Admin sees email and export; Manager sees export only (or both? we keep export for all)
       const actionDiv = document.getElementById('logActionButtons');
       actionDiv.innerHTML = isAdmin ? 
         `<button class="btn btn-warning" onclick="prepSendMail('single')"><i data-lucide="mail"></i> Email đã chọn</button>
@@ -1470,13 +1472,13 @@
       } catch (e) { showToast("Gửi mail thất bại!", "error"); }
     }
 
-    // Dummy export function (you can implement CSV export if needed)
+    // Export CSV function
     function exportLogsToCSV() {
       let csv = "Thời gian,Mã NV,Tên NV,Mã TB,Ngoại quan,Áp suất,Hạn SD,Ghi chú,Link Ảnh\n";
       currentFilteredLogs.forEach(log => {
         csv += `"${log.thoi_gian}","${log.ma_nv}","${log.ten_nv}","${log.ma_tb}","${log.ngoai_quan}","${log.ap_suat}","${log.han_sd}","${log.ghi_chu}","${log.link_anh}"\n`;
       });
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }); // BOM for UTF-8
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = 'pccc_logs.csv';
