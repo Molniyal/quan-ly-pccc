@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PCCC - Dashboard - Test</title>
+  <title>PCCC - Dashboard</title>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* ========== RED & WHITE PROFESSIONAL PCCC THEME ========== */
     :root {
       --primary: #e11d48;
-      /* Fire Red */
       --primary-hover: #be123c;
       --primary-glow: rgba(225, 29, 72, 0.2);
       --secondary: #475569;
@@ -42,7 +40,6 @@
       min-height: 100vh;
     }
 
-    /* Subtle Background Blobs */
     .blob {
       position: fixed;
       width: 600px;
@@ -62,13 +59,8 @@
     }
 
     @keyframes move {
-      from {
-        transform: translate(-10%, -10%);
-      }
-
-      to {
-        transform: translate(10%, 15%);
-      }
+      from { transform: translate(-10%, -10%); }
+      to { transform: translate(10%, 15%); }
     }
 
     .sidebar {
@@ -84,6 +76,7 @@
       z-index: 1001;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+      overflow-y: auto;
     }
 
     .sidebar h2 {
@@ -114,62 +107,9 @@
       color: var(--primary);
     }
 
-    .pagination-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      padding: 10px;
-      background: #f8fafc;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .page-btn {
-      background: white;
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: all 0.2s;
-    }
-
-    .page-btn:hover:not(:disabled) {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    .page-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .page-num {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .sidebar-item.active i {
-      color: white;
-      opacity: 1;
-    }
-
     .sidebar-item i {
       color: var(--primary);
-      /* Colorful icons */
       opacity: 0.8;
-    }
-
-    .sidebar-item.active i {
-      color: white;
-      opacity: 1;
     }
 
     .sidebar-item.active {
@@ -177,33 +117,32 @@
       color: white;
       box-shadow: 0 8px 15px rgba(225, 29, 72, 0.2);
     }
+    .sidebar-item.active i {
+      color: white;
+      opacity: 1;
+    }
 
     @media (min-width: 769px) {
       .sidebar.collapsed {
         width: var(--sidebar-collapsed);
         padding: 30px 15px;
       }
-
       .sidebar.collapsed .hide-text {
         display: none;
       }
-
       .sidebar.collapsed h2 {
         justify-content: center;
         transform: scale(1.1);
       }
-
       .sidebar.collapsed .sidebar-item {
         justify-content: center;
         padding: 14px 0;
       }
-
       .main-content {
         margin-left: var(--sidebar-width);
         width: calc(100% - var(--sidebar-width));
         transition: 0.4s;
       }
-
       .main-content.expanded {
         margin-left: var(--sidebar-collapsed);
         width: calc(100% - var(--sidebar-collapsed));
@@ -225,17 +164,14 @@
         width: 280px;
         z-index: 1001;
       }
-
       .sidebar.mobile-open {
         transform: translateX(0);
       }
-
       .main-content {
         margin-left: 0;
         width: 100%;
         padding: 20px;
       }
-
       .hide-text {
         display: inline-block !important;
       }
@@ -272,17 +208,11 @@
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Stats grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -317,22 +247,6 @@
       opacity: 0.1;
     }
 
-    .stat-card:nth-child(1) {
-      background: linear-gradient(135deg, #fff 60%, #fff1f2 100%);
-    }
-
-    .stat-card:nth-child(2) {
-      background: linear-gradient(135deg, #fff 60%, #f0fdf4 100%);
-    }
-
-    .stat-card:nth-child(3) {
-      background: linear-gradient(135deg, #fff 60%, #fff7ed 100%);
-    }
-
-    .stat-card:nth-child(4) {
-      background: linear-gradient(135deg, #fff 60%, #f0f9ff 100%);
-    }
-
     .stat-label {
       color: var(--text-muted);
       font-size: 13px;
@@ -350,6 +264,53 @@
       font-weight: 800;
       color: var(--text-main);
       margin: 0;
+    }
+
+    /* uninspected list for user */
+    .uninspected-list {
+      background: white;
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
+    }
+    .uninspected-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .uninspected-item:last-child {
+      border-bottom: none;
+    }
+    .uninspected-info {
+      font-weight: 600;
+    }
+    .uninspected-info .ma {
+      color: var(--primary);
+      margin-right: 10px;
+    }
+    .uninspected-info .khu {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .btn-small {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-small:hover {
+      background: var(--primary-hover);
     }
 
     .content-card {
@@ -370,7 +331,6 @@
       box-shadow: var(--card-shadow);
     }
 
-    /* TABLES CLEAN STYLE */
     .table-responsive {
       border-radius: 16px;
       border: 1px solid #e2e8f0;
@@ -464,11 +424,10 @@
       background: #10b981;
     }
 
-    .btn:active {
-      transform: translateY(0);
+    .btn-warning {
+      background: #f59e0b;
     }
 
-    /* FORM INPUTS */
     .form-input {
       width: 100%;
       padding: 12px 16px;
@@ -487,7 +446,6 @@
       box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.08);
     }
 
-    /* REDUCED IMAGE SIZE IN LOGS */
     .img-thumb {
       width: 40px;
       height: 40px;
@@ -504,7 +462,7 @@
       z-index: 10;
     }
 
-    /* ZALO MOCK NOTIFICATION - RED THEME */
+    /* Zalo Simulator */
     #zalo-simulator {
       position: fixed;
       top: 30px;
@@ -521,15 +479,6 @@
       display: flex;
       gap: 15px;
       align-items: center;
-    }
-
-    .modal-img {
-      max-width: 100%;
-      max-height: 250px;
-      object-fit: contain;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-      margin-bottom: 15px;
     }
 
     #zalo-simulator.show {
@@ -559,7 +508,6 @@
       line-height: 1.4;
     }
 
-    /* MODAL CLEAN */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -583,15 +531,8 @@
     }
 
     @keyframes popIn {
-      from {
-        transform: scale(0.95);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .filter-bar {
@@ -618,10 +559,9 @@
     }
 
     @media print {
-      body>* {
+      body > *:not(#printArea) {
         display: none !important;
       }
-
       #printArea {
         display: block !important;
         position: absolute;
@@ -630,7 +570,6 @@
         width: 100%;
         background: white !important;
       }
-
       .ticket {
         display: inline-block;
         width: 180px;
@@ -641,40 +580,50 @@
         border-radius: 12px;
         page-break-inside: avoid;
       }
-
       .ticket img {
         width: 140px;
         height: 140px;
       }
-
-      .ticket h3 {
-        margin: 10px 0 5px 0;
-        font-weight: 800;
-        font-size: 18px;
-      }
-
-      .ticket p {
-        margin: 0;
-        font-size: 12px;
-        color: #64748b;
-      }
     }
-
     #printArea {
       display: none;
+    }
+    #toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 9999;
+    }
+    .toast {
+      background: white;
+      border-left: 4px solid var(--primary);
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      animation: slideIn 0.3s ease;
+    }
+    .toast.success { border-left-color: #10b981; }
+    .toast.error { border-left-color: #dc2626; }
+    .toast.warning { border-left-color: #f59e0b; }
+    @keyframes slideIn {
+      from { transform: translateX(-100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <div class="blob"></div>
   <div class="blob blob-2"></div>
 
-  <!-- Zalo Simulator UI -->
+  <!-- Zalo Simulator -->
   <div id="zalo-simulator">
-    <div class="zalo-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" width="30">
-    </div>
+    <div class="zalo-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" width="30"></div>
     <div class="zalo-content">
       <div id="zalo-title">Hệ Thống PCCC</div>
       <div id="zalo-body">Thông báo mới từ hệ thống...</div>
@@ -685,39 +634,34 @@
   <div id="printArea"></div>
   <div id="mobile-overlay" onclick="toggleSidebar()"></div>
 
+  <!-- Custom Dialog -->
   <div id="customDialog" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="text-align: center; max-width: 350px;">
       <h3 id="dialogTitle" style="margin-top:0; font-weight: 800;">Xác nhận</h3>
       <p id="dialogMessage" style="margin: 15px 0; color:#94a3b8; font-size:15px;"></p>
       <div style="display:flex; gap:10px; margin-top:25px;">
         <button id="dialogBtnOk" class="btn btn-primary" style="flex:1;">Đồng ý</button>
-        <button class="btn"
-          style="flex:1; background:#f1f5f9; color:var(--text-main); border: 1px solid var(--card-border);"
-          onclick="closeDialog()">Hủy</button>
+        <button class="btn" style="flex:1; background:#f1f5f9; color:var(--text-main); border: 1px solid var(--card-border);" onclick="closeDialog()">Hủy</button>
       </div>
     </div>
   </div>
 
+  <!-- Login Modal -->
   <div id="loginModal" class="modal-overlay">
     <div class="modal-content" style="text-align: center; max-width: 400px; padding: 45px;">
-      <div
-        style="background:linear-gradient(135deg, var(--primary), var(--secondary)); width:70px; height:70px; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 25px auto; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);">
+      <div style="background:linear-gradient(135deg, var(--primary), var(--secondary)); width:70px; height:70px; border-radius:24px; display:flex; align-items:center; justify-content:center; margin:0 auto 25px auto; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);">
         <i data-lucide="shield" style="color:white; width:35px; height:35px;"></i>
       </div>
-      <h2 style="margin-bottom: 30px; font-weight: 800; letter-spacing: -0.02em;">HỆ THỐNG PCCC <span
-          style="display:block; font-size:14px; font-weight:400; color:var(--primary); margin-top:5px;">Professional
-          Dashboard</span></h2>
+      <h2 style="margin-bottom: 30px; font-weight: 800; letter-spacing: -0.02em;">HỆ THỐNG PCCC <span style="display:block; font-size:14px; font-weight:400; color:var(--primary); margin-top:5px;">Professional Dashboard</span></h2>
       <form id="loginForm">
-        <input type="text" id="maNvLogin" class="form-input" placeholder="Mã Nhân Viên" required
-          style="margin-bottom: 15px;">
-        <input type="password" id="passLogin" class="form-input" placeholder="Mật khẩu" required
-          style="margin-bottom: 25px;">
-        <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; font-size: 16px;">ĐĂNG NHẬP HỆ
-          THỐNG</button>
+        <input type="text" id="maNvLogin" class="form-input" placeholder="Mã Nhân Viên" required style="margin-bottom: 15px;">
+        <input type="password" id="passLogin" class="form-input" placeholder="Mật khẩu" required style="margin-bottom: 25px;">
+        <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; font-size: 16px;">ĐĂNG NHẬP HỆ THỐNG</button>
       </form>
     </div>
   </div>
 
+  <!-- Email Dialog -->
   <div id="emailDialog" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width: 500px;">
       <h3 style="margin-top:0;"><i data-lucide="mail"></i> Soạn Email Báo Cáo</h3>
@@ -732,63 +676,38 @@
 
       <input type="hidden" id="emailType">
       <div style="display:flex; gap:10px; margin-top:15px;">
-        <button class="btn btn-success" style="flex:1;" onclick="executeSendEmail()"><i data-lucide="send"></i> Gửi
-          Ngay</button>
-        <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;"
-          onclick="document.getElementById('emailDialog').style.display='none'">Hủy</button>
+        <button class="btn btn-success" style="flex:1;" onclick="executeSendEmail()"><i data-lucide="send"></i> Gửi Ngay</button>
+        <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;" onclick="document.getElementById('emailDialog').style.display='none'">Hủy</button>
       </div>
     </div>
   </div>
 
+  <!-- Edit Log Modal -->
   <div id="editLogModal" class="modal-overlay" style="display:none;">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 style="margin:0;">Báo Cáo: <span id="editMaTB" style="color:var(--primary);"></span></h3>
-        <button class="menu-btn" onclick="document.getElementById('editLogModal').style.display='none'"><i
-            data-lucide="x"></i></button>
+        <button class="menu-btn" onclick="document.getElementById('editLogModal').style.display='none'"><i data-lucide="x"></i></button>
       </div>
       <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-
       <div style="text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
         <p style="margin:0 0 5px 0; font-size:12px; font-weight:bold; color:#64748b;">ẢNH MINH CHỨNG</p>
         <img id="editImage" class="report-image-preview" src="" alt="Ảnh minh chứng">
       </div>
-
-      <p style="font-size:13px; color:#666; margin-bottom:15px;">Người KT: <b id="editNguoiKT"></b> | Thời gian: <b
-          id="editTime"></b></p>
-
+      <p style="font-size:13px; color:#666; margin-bottom:15px;">Người KT: <b id="editNguoiKT"></b> | Thời gian: <b id="editTime"></b></p>
       <input type="hidden" id="editThoiGian">
       <div style="display:flex; gap:10px;">
-        <div style="flex:1;">
-          <label style="font-size:13px; font-weight:600;">Ngoại quan:</label>
-          <select id="editNq" class="form-input">
-            <option value="Đạt">Đạt</option>
-            <option value="Lỗi">Lỗi</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <label style="font-size:13px; font-weight:600;">Áp suất:</label>
-          <select id="editAs" class="form-input">
-            <option value="Đạt">Đạt</option>
-            <option value="Lỗi">Lỗi</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <label style="font-size:13px; font-weight:600;">Hạn SD:</label>
-          <select id="editHs" class="form-input">
-            <option value="Còn hạn">Còn hạn</option>
-            <option value="Hết hạn">Hết hạn</option>
-          </select>
-        </div>
+        <div style="flex:1;"><label style="font-size:13px; font-weight:600;">Ngoại quan:</label><select id="editNq" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select></div>
+        <div style="flex:1;"><label style="font-size:13px; font-weight:600;">Áp suất:</label><select id="editAs" class="form-input"><option value="Đạt">Đạt</option><option value="Lỗi">Lỗi</option></select></div>
+        <div style="flex:1;"><label style="font-size:13px; font-weight:600;">Hạn SD:</label><select id="editHs" class="form-input"><option value="Còn hạn">Còn hạn</option><option value="Hết hạn">Hết hạn</option></select></div>
       </div>
       <label style="font-size:13px; font-weight:600;">Ghi chú chi tiết:</label>
       <textarea id="editGc" class="form-input" rows="3"></textarea>
-
-      <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="submitEditLog()"><i
-          data-lucide="save"></i> Lưu Thay Đổi</button>
+      <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="submitEditLog()"><i data-lucide="save"></i> Lưu Thay Đổi</button>
     </div>
   </div>
 
+  <!-- Edit Location Modal -->
   <div id="editLocModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:350px;">
       <h3 style="margin-top:0;">Sửa Vị Trí: <span id="editLocMaTB" style="color:var(--primary);"></span></h3>
@@ -798,12 +717,12 @@
       <input type="text" id="editLocKhuVuc" class="form-input">
       <div style="display:flex; gap:10px; margin-top:10px;">
         <button class="btn btn-primary" style="flex:1;" onclick="submitEditLoc()">Lưu Cập Nhật</button>
-        <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;"
-          onclick="document.getElementById('editLocModal').style.display='none'">Hủy</button>
+        <button class="btn" style="flex:1; background:#e2e8f0; color:#0f172a;" onclick="document.getElementById('editLocModal').style.display='none'">Hủy</button>
       </div>
     </div>
   </div>
 
+  <!-- Add Location Modal -->
   <div id="addLocModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:350px;">
       <h3 style="margin-top:0;"><i data-lucide="plus-circle" style="color:var(--success);"></i> Thêm Vị Trí Mới</h3>
@@ -816,30 +735,18 @@
       <label style="font-size:12px; font-weight:700;">Email Quản Lý (Nhận cảnh báo):</label>
       <input type="email" id="addEmail" class="form-input" placeholder="email@congty.com">
       <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn btn-success" style="flex:1;" onclick="submitAddLoc()"><i data-lucide="save"></i> Thêm
-          Mới</button>
-        <button class="btn" style="flex:1; background:#f1f5f9; color:#64748b;"
-          onclick="document.getElementById('addLocModal').style.display='none'">Hủy</button>
+        <button class="btn btn-success" style="flex:1;" onclick="submitAddLoc()"><i data-lucide="save"></i> Thêm Mới</button>
+        <button class="btn" style="flex:1; background:#f1f5f9; color:#64748b;" onclick="document.getElementById('addLocModal').style.display='none'">Hủy</button>
       </div>
     </div>
   </div>
 
+  <!-- Sidebar will be dynamically populated by JS -->
   <div class="sidebar" id="sidebar">
-    <h2><i data-lucide="shield-check"></i> <span class="hide-text">QUẢN LÝ PCCC V1.0</span></h2>
-    <div class="sidebar-item active" onclick="switchTab('dashboard', this)"><i data-lucide="layout-dashboard"></i> <span
-        class="hide-text">Tổng quan</span></div>
-    <div class="sidebar-item" onclick="switchTab('locations', this)"><i data-lucide="map-pin"></i> <span
-        class="hide-text">Vị trí & QR Code</span></div>
-    <div class="sidebar-item" onclick="switchTab('logs', this)"><i data-lucide="clipboard-list"></i> <span
-        class="hide-text">Nhật ký kiểm tra</span></div>
-    <div class="sidebar-item" onclick="switchTab('settings', this)"><i data-lucide="settings"></i> <span
-        class="hide-text">Cài đặt Email</span></div>
-    <hr style="border-color: #334155; margin: 20px 0;">
-    <a href="scan.html" target="_blank" class="sidebar-item" style="text-decoration: none;"><i
-        data-lucide="smartphone"></i> <span class="hide-text">App Quét Mã</span></a>
+    <h2><i data-lucide="shield-check"></i> <span class="hide-text">QUẢN LÝ PCCC</span></h2>
+    <div id="sidebar-items"></div>
     <div style="position: absolute; bottom: 20px; width: calc(100% - 40px);">
-      <button class="btn btn-danger" style="width: 100%; justify-content:center;" onclick="appLogout()"><i
-          data-lucide="log-out"></i> <span class="hide-text">Đăng xuất</span></button>
+      <button class="btn btn-danger" style="width: 100%; justify-content:center;" onclick="appLogout()"><i data-lucide="log-out"></i> <span class="hide-text">Đăng xuất</span></button>
     </div>
   </div>
 
@@ -847,223 +754,119 @@
     <div class="header-top">
       <div style="display:flex; align-items:center; gap:15px;">
         <button class="menu-btn" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
-        <h2 id="pageTitle" style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 24px;">Tổng Quan
-          Thống Kê</h2>
+        <h2 id="pageTitle" style="margin: 0; color: var(--text-main); font-weight: 800; font-size: 24px;">Tổng Quan</h2>
       </div>
       <div style="display: flex; align-items: center; gap: 15px;">
         <button class="btn btn-primary" style="padding: 8px 16px;" onclick="refreshData()">
           <i data-lucide="refresh-cw"></i> Làm mới
         </button>
-        <div style="text-align: right;"><b id="userName" style="color: #2563eb; font-size: 15px;">Đang tải...</b><br><span
-            id="userRole" style="color: #64748b; font-size: 12px;"></span></div>
+        <div style="text-align: right;"><b id="userName" style="color: #2563eb; font-size: 15px;">Đang tải...</b><br><span id="userRole" style="color: #64748b; font-size: 12px;"></span></div>
       </div>
     </div>
 
+    <!-- Dashboard View -->
     <div id="view-dashboard" class="view-section active">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label"><i data-lucide="layers" style="width:14px;"></i> Tổng thiết bị</span>
-          <p id="st-total" class="stat-value">0</p>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label"><i data-lucide="check-circle" style="width:14px; color:var(--success);"></i> Đã kiểm
-            tra</span>
-          <p id="st-inspected" class="stat-value">0</p>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label"><i data-lucide="alert-triangle" style="width:14px; color:var(--danger);"></i> Phát
-            hiện Lỗi</span>
-          <p id="st-errors" class="stat-value">0</p>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label"><i data-lucide="qr-code" style="width:14px; color:var(--accent);"></i> Hỏng mã
-            QR</span>
-          <p id="st-brokenQR" class="stat-value">0</p>
-        </div>
-        <!-- Thêm stat mới: Chưa kiểm tra -->
-        <div class="stat-card">
-          <span class="stat-label"><i data-lucide="eye-off" style="width:14px;"></i> Chưa kiểm tra</span>
-          <p id="st-uninspected" class="stat-value">0</p>
-        </div>
-      </div>
-
-      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:25px;">
-        <div class="content-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0;">📊 Tỷ lệ hoàn thành theo Xưởng (%)</h3>
-            <div style="display:flex; gap:10px;">
-              <select id="dashYear" class="form-input" style="width:130px;" onchange="renderDashboard()"></select>
-              <select id="dashMonth" class="form-input" style="width:130px;" onchange="renderDashboard()"></select>
-              <button class="btn" style="background:#f1f5f9; color:#64748b;" onclick="clearDashFilter()"
-                title="Xóa lọc">✕</button>
-            </div>
-          </div>
-          <div class="chart-container"><canvas id="progressChart"></canvas></div>
-        </div>
-
-        <div class="content-card" style="padding: 20px;">
-          <h3 style="margin:0 0 15px 0; font-size:16px; display:flex; align-items:center; gap:8px;"><i
-              data-lucide="calendar-clock" style="color:var(--primary);"></i> Dự báo Bảo trì</h3>
-          <div id="maintenance-alert-list" style="max-height: 300px; overflow-y: auto;">
-            <!-- Dynamic alert items -->
-          </div>
-          <p style="font-size:11px; color:#94a3b8; margin-top:10px;">* Danh sách thiết bị có báo cáo 'Hết hạn' hoặc
-            'Lỗi' mới nhất.</p>
-        </div>
-      </div>
+      <!-- This section will be filled by JS based on role -->
     </div>
 
+    <!-- Locations View (visible to Admin/Manager) -->
     <div id="view-locations" class="view-section">
       <div class="content-card">
         <div class="filter-bar">
           <input type="text" id="locSearch" placeholder="Tìm mã bình..." onkeyup="renderLocations()">
-          <select id="locXuong" onchange="renderLocations()">
-            <option value="ALL">Tất cả Xưởng</option>
-          </select>
-          <!-- Checkbox ẩn vị trí đã kiểm tra -->
+          <select id="locXuong" onchange="renderLocations()"><option value="ALL">Tất cả Xưởng</option></select>
           <label style="display: flex; align-items: center; gap: 5px;">
             <input type="checkbox" id="hideInspected" onchange="renderLocations()"> 
             <span style="font-size: 13px;">Ẩn vị trí đã kiểm tra</span>
           </label>
-          <div style="margin-left: auto; display:flex; gap:10px;">
-            <button class="btn btn-success" onclick="openAddLoc()"><i data-lucide="plus"></i> Thêm Vị Trí</button>
-            <button class="btn btn-warning" onclick="printSelected()"><i data-lucide="printer"></i> In đã chọn</button>
-            <button class="btn btn-primary" onclick="printAll()"><i data-lucide="printer"></i> In tất cả</button>
+          <div style="margin-left: auto; display:flex; gap:10px;" id="locationActionButtons">
+            <!-- Admin buttons will be injected via JS -->
           </div>
         </div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th width="40"><input type="checkbox"
-                    onchange="document.querySelectorAll('.qr-select').forEach(cb=>cb.checked=this.checked)"></th>
-                <th width="60">Hình QR</th>
-                <th>Mã Bình</th>
-                <th>Xưởng</th>
-                <th>Khu Vực</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
+            <thead><tr><th width="40"><input type="checkbox" onchange="document.querySelectorAll('.qr-select').forEach(cb=>cb.checked=this.checked)"></th><th width="60">Hình QR</th><th>Mã Bình</th><th>Xưởng</th><th>Khu Vực</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
             <tbody id="locations-table"></tbody>
           </table>
         </div>
         <div class="pagination-controls">
-          <button class="page-btn" id="prevLocBtn" onclick="changeLocPage(-1)"><i data-lucide="chevron-left"></i> Trang
-            trước</button>
+          <button class="page-btn" id="prevLocBtn" onclick="changeLocPage(-1)"><i data-lucide="chevron-left"></i> Trang trước</button>
           <div class="page-num">Trang <span id="currentLocPage">1</span> / <span id="totalLocPages">1</span></div>
-          <button class="page-btn" id="nextLocBtn" onclick="changeLocPage(1)">Trang sau <i
-              data-lucide="chevron-right"></i></button>
+          <button class="page-btn" id="nextLocBtn" onclick="changeLocPage(1)">Trang sau <i data-lucide="chevron-right"></i></button>
         </div>
       </div>
     </div>
 
+    <!-- Logs View (visible to all roles) -->
     <div id="view-logs" class="view-section">
       <div class="content-card">
         <div class="filter-bar">
           <input type="date" id="logDate" onchange="renderLogs()">
-          <select id="logXuong" onchange="renderLogs()">
-            <option value="ALL">Tất cả Xưởng</option>
-          </select>
-          <select id="logStatus" onchange="renderLogs()">
-            <option value="ALL">Tất cả Trạng thái</option>
-            <option value="ERRORS">Chỉ bình LỖI</option>
-          </select>
+          <select id="logXuong" onchange="renderLogs()"><option value="ALL">Tất cả Xưởng</option></select>
+          <select id="logStatus" onchange="renderLogs()"><option value="ALL">Tất cả Trạng thái</option><option value="ERRORS">Chỉ bình LỖI</option></select>
           <input type="text" id="logSearch" placeholder="Tìm mã TB, NV..." onkeyup="renderLogs()">
-          <div style="margin-left: auto; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn btn-warning" onclick="prepSendMail('single')"><i data-lucide="mail"></i> Email đã
-              chọn</button>
-            <button class="btn btn-success" onclick="prepSendMail('mass')"><i data-lucide="file-text"></i> Gửi
-              Bảng</button>
-            <button class="btn" style="background:#10b981; color:white;" onclick="exportLogsToCSV()"><i
-                data-lucide="download"></i> Xuất CSV</button>
+          <div style="margin-left: auto; display:flex; gap:10px; flex-wrap:wrap;" id="logActionButtons">
+            <!-- Admin/Manager buttons will be injected via JS -->
           </div>
         </div>
         <div class="table-responsive">
           <table>
-            <thead>
-              <tr>
-                <th width="40"><input type="checkbox"
-                    onchange="document.querySelectorAll('.log-select').forEach(c=>c.checked=this.checked)"></th>
-                <th>Thời gian</th>
-                <th>Xưởng</th>
-                <th>Mã TB</th>
-                <th>Người KT</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
-                <th>Ảnh minh chứng</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
+            <thead><tr><th width="40"><input type="checkbox" onchange="document.querySelectorAll('.log-select').forEach(c=>c.checked=this.checked)"></th><th>Thời gian</th><th>Xưởng</th><th>Mã TB</th><th>Người KT</th><th>Trạng thái</th><th>Ghi chú</th><th>Ảnh</th><th>Hành động</th></tr></thead>
             <tbody id="logs-table"></tbody>
           </table>
         </div>
         <div class="pagination-controls">
-          <button class="page-btn" id="prevLogBtn" onclick="changeLogPage(-1)"><i data-lucide="chevron-left"></i> Trang
-            trước</button>
+          <button class="page-btn" id="prevLogBtn" onclick="changeLogPage(-1)"><i data-lucide="chevron-left"></i> Trang trước</button>
           <div class="page-num">Trang <span id="currentLogPage">1</span> / <span id="totalLogPages">1</span></div>
-          <button class="page-btn" id="nextLogPage" onclick="changeLogPage(1)">Trang sau <i
-              data-lucide="chevron-right"></i></button>
+          <button class="page-btn" id="nextLogPage" onclick="changeLogPage(1)">Trang sau <i data-lucide="chevron-right"></i></button>
         </div>
       </div>
     </div>
 
+    <!-- Settings View (visible only to Admin) -->
     <div id="view-settings" class="view-section">
       <div class="content-card" style="max-width: 800px;">
         <div style="margin-bottom:25px; border-bottom:1px solid #eee; padding-bottom:15px;">
-          <h3 style="margin:0 0 10px 0;"><i data-lucide="bell-ring" style="color:var(--primary);"></i> Cấu hình Thông
-            báo (Zalo/Telegram)</h3>
+          <h3 style="margin:0 0 10px 0;"><i data-lucide="bell-ring" style="color:var(--primary);"></i> Cấu hình Thông báo (Zalo/Telegram)</h3>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-            <div>
-              <label style="font-size:12px; font-weight:700;">Zalo Webhook URL:</label>
-              <input type="text" id="zaloWebhook" class="form-input" placeholder="Dán link webhook Zalo tại đây..."
-                value="DEMO_MODE_ACTIVE">
-            </div>
-            <div>
-              <label style="font-size:12px; font-weight:700;">Telegram Bot Token:</label>
-              <input type="text" id="teleWebhook" class="form-input" placeholder="bot123456:ABC-DEF...">
-            </div>
+            <div><label style="font-size:12px; font-weight:700;">Zalo Webhook URL:</label><input type="text" id="zaloWebhook" class="form-input" placeholder="Dán link webhook Zalo tại đây..." value="DEMO_MODE_ACTIVE"></div>
+            <div><label style="font-size:12px; font-weight:700;">Telegram Bot Token:</label><input type="text" id="teleWebhook" class="form-input" placeholder="bot123456:ABC-DEF..."></div>
           </div>
-          <p style="font-size:11px; color:#64748b; margin-top:8px;">* Hiện tại hệ thống đang ở chế độ <b>Mô phỏng
-              (Simulation)</b>. Khi có lỗi, thông báo Zalo giả lập sẽ hiện lên góc màn hình.</p>
+          <p style="font-size:11px; color:#64748b; margin-top:8px;">* Hiện tại hệ thống đang ở chế độ <b>Mô phỏng (Simulation)</b>.</p>
         </div>
-
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
           <h3 style="margin:0;"><i data-lucide="mail" style="color:var(--primary);"></i> Quản lý Mẫu Email</h3>
           <button class="btn btn-success" onclick="addNewTemplate()"><i data-lucide="plus"></i> Thêm Mẫu Mới</button>
         </div>
-
         <div id="template-list"></div>
-        <button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px; font-size:16px;"
-          onclick="saveTemplates()"><i data-lucide="save"></i> LƯU TẤT CẢ CÀI ĐẶT</button>
+        <button class="btn btn-primary" style="width:100%; margin-top:20px; padding:15px; font-size:16px;" onclick="saveTemplates()"><i data-lucide="save"></i> LƯU TẤT CẢ CÀI ĐẶT</button>
       </div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY:
+    // CONFIGURATION
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeAKJLBBEEYWhwV9e-1y2m9FNlxf3pzhtnj6bda7niJLsuQEFKA7eBZhSRc6XxMdpeTQ/exec";
-    // 🔴 2. ĐIỀN TÊN MIỀN GITHUB PAGES VÀO ĐÂY:
     const DOMAIN = "https://molniyal.github.io/quan-ly-pccc";
     // ==========================================
 
     let globalData = { locations: [], logs: [], templates: [] };
     let currentFilteredLogs = [];
-    let currentFilteredLocs = []; // Added for pagination
+    let currentFilteredLocs = [];
     let myChart = null;
+    let pageLoc = 1, rowsLoc = 30;
+    let pageLog = 1, rowsLog = 30;
 
-    // PAGINATION STATE
-    let pageLoc = 1; const rowsLoc = 30;
-    let pageLog = 1; const rowsLog = 30;
-
-    // ================= UI HELPERS =================
+    // ---------- UI Helpers ----------
     function showToast(msg, type = 'success') {
       const container = document.getElementById('toast-container');
-      const toast = document.createElement('div'); toast.className = `toast ${type}`;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
       let icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'x-circle' : 'alert-circle');
       toast.innerHTML = `<i data-lucide="${icon}"></i> <span>${msg}</span>`;
-      container.appendChild(toast); lucide.createIcons();
+      container.appendChild(toast);
+      lucide.createIcons();
       setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
@@ -1077,7 +880,18 @@
     document.getElementById('dialogBtnOk').addEventListener('click', () => { closeDialog(); if (dialogCallback) dialogCallback(true); });
     function closeDialog() { document.getElementById('customDialog').style.display = 'none'; }
 
-    // ================= KHỞI TẠO =================
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-open');
+        document.getElementById('mobile-overlay').style.display = sidebar.classList.contains('mobile-open') ? 'block' : 'none';
+      } else {
+        sidebar.classList.toggle('collapsed');
+        document.getElementById('mainContent').classList.toggle('expanded');
+      }
+    }
+
+    // ---------- Authentication & Data Fetching ----------
     window.onload = () => {
       lucide.createIcons();
       initDateFilters();
@@ -1090,48 +904,13 @@
       }
     };
 
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const content = document.getElementById('mainContent');
-      if (window.innerWidth <= 768) {
-        sidebar.classList.toggle('mobile-open');
-        document.getElementById('mobile-overlay').style.display = sidebar.classList.contains('mobile-open') ? 'block' : 'none';
-      } else {
-        sidebar.classList.toggle('collapsed');
-        content.classList.toggle('expanded');
-      }
-    }
-
-    function initDateFilters() {
-      let yHtml = '<option value="ALL">Tất cả Năm</option>';
-      const cy = new Date().getFullYear();
-      for (let i = cy - 1; i <= cy + 1; i++) yHtml += `<option value="${i}" ${i === cy ? 'selected' : ''}>Năm ${i}</option>`;
-      document.getElementById('dashYear').innerHTML = yHtml;
-
-      let mHtml = '<option value="ALL">Tất cả Tháng</option>';
-      const cm = new Date().getMonth() + 1;
-      for (let i = 1; i <= 12; i++) mHtml += `<option value="${i}" ${i === cm ? 'selected' : ''}>Tháng ${i}</option>`;
-      document.getElementById('dashMonth').innerHTML = mHtml;
-    }
-
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector('button'); btn.innerText = "Đang xác thực...";
+      const btn = e.target.querySelector('button');
+      btn.innerText = "Đang xác thực...";
       await fetchData(document.getElementById('maNvLogin').value.trim(), document.getElementById('passLogin').value.trim());
       btn.innerText = "Đăng Nhập";
     });
-
-    function appLogout() { showDialog("Xác nhận", "Bạn có chắc muốn đăng xuất?", (res) => { if (res) { localStorage.removeItem('pccc_session'); window.location.reload(); } }); }
-
-    function switchTab(tabId, element) {
-      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-      document.getElementById(`view-${tabId}`).classList.add('active');
-      if (element) element.classList.add('active');
-      const t = { 'dashboard': 'Tổng Quan', 'locations': 'Quản Lý Vị Trí', 'logs': 'Nhật Ký & Báo Cáo', 'settings': 'Quản lý Mẫu Email' };
-      document.getElementById('pageTitle').innerText = t[tabId];
-      if (window.innerWidth <= 768) toggleSidebar();
-    }
 
     async function fetchData(maNv, pass) {
       try {
@@ -1142,31 +921,108 @@
         localStorage.setItem('pccc_session', JSON.stringify({ ma: maNv, pass: pass }));
         document.getElementById('loginModal').style.display = 'none';
         document.getElementById('userName').innerText = "Xin chào, " + data.name;
-        document.getElementById('userRole').innerText = data.role === "ADMIN" ? "Quản Trị Viên" : `Quản lý: ${data.xuong}`;
+        document.getElementById('userRole').innerText = 
+          data.role === "ADMIN" ? "Quản Trị Viên" : 
+          data.role === "MANAGER" ? `Quản lý xưởng: ${data.xuong}` : 
+          "Nhân viên";
 
         globalData = data;
-        populateDropdowns(); renderDashboard(); renderLocations(); renderLogs(); renderTemplates();
+        // After data loaded, render sidebar based on role
+        renderSidebar();
+        populateDropdowns();
+        renderDashboard();
+        renderLocations();
+        renderLogs();
+        renderTemplates();
         showToast("Tải dữ liệu thành công!", "success");
       } catch (err) { showToast("Lỗi kết nối mạng!", 'error'); }
     }
 
-    // Hàm làm mới dữ liệu
-    async function refreshData() {
+    function refreshData() {
       const savedUser = JSON.parse(localStorage.getItem('pccc_session'));
       if (savedUser) {
         showToast('Đang tải lại dữ liệu...', 'warning');
-        await fetchData(savedUser.ma, savedUser.pass);
+        fetchData(savedUser.ma, savedUser.pass);
       }
+    }
+
+    function appLogout() {
+      showDialog("Xác nhận", "Bạn có chắc muốn đăng xuất?", (res) => { if (res) { localStorage.removeItem('pccc_session'); window.location.reload(); } });
+    }
+
+    // ---------- Role-based Sidebar ----------
+    function renderSidebar() {
+      const role = globalData.role;
+      const container = document.getElementById('sidebar-items');
+      let items = [];
+
+      // Common items for all roles
+      items.push({ id: 'dashboard', icon: 'layout-dashboard', label: 'Tổng quan' });
+
+      // Locations only for Admin and Manager
+      if (role === 'ADMIN' || role === 'MANAGER') {
+        items.push({ id: 'locations', icon: 'map-pin', label: 'Vị trí & QR Code' });
+      }
+
+      // Logs for everyone
+      items.push({ id: 'logs', icon: 'clipboard-list', label: 'Nhật ký kiểm tra' });
+
+      // Settings only for Admin
+      if (role === 'ADMIN') {
+        items.push({ id: 'settings', icon: 'settings', label: 'Cài đặt Email' });
+      }
+
+      // External scan link: only Admin and Manager? According to request, user should not see it. We'll hide for User.
+      if (role !== 'USER') {
+        items.push({ divider: true });
+        items.push({ id: 'scan', icon: 'smartphone', label: 'App Quét Mã', external: 'scan.html' });
+      }
+
+      // Build HTML
+      let html = '';
+      items.forEach(item => {
+        if (item.divider) {
+          html += '<hr style="border-color: #334155; margin: 20px 0;">';
+        } else if (item.external) {
+          html += `<a href="${item.external}" target="_blank" class="sidebar-item" style="text-decoration: none;"><i data-lucide="${item.icon}"></i> <span class="hide-text">${item.label}</span></a>`;
+        } else {
+          html += `<div class="sidebar-item ${item.id === 'dashboard' ? 'active' : ''}" onclick="switchTab('${item.id}', this)"><i data-lucide="${item.icon}"></i> <span class="hide-text">${item.label}</span></div>`;
+        }
+      });
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function switchTab(tabId, element) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${tabId}`).classList.add('active');
+      if (element) element.classList.add('active');
+      const titles = { 'dashboard': 'Tổng Quan', 'locations': 'Quản Lý Vị Trí', 'logs': 'Nhật Ký & Báo Cáo', 'settings': 'Cài đặt Email' };
+      document.getElementById('pageTitle').innerText = titles[tabId] || 'Tổng Quan';
+      if (window.innerWidth <= 768) toggleSidebar();
+    }
+
+    function initDateFilters() {
+      let yHtml = '<option value="ALL">Tất cả Năm</option>';
+      const cy = new Date().getFullYear();
+      for (let i = cy - 1; i <= cy + 1; i++) yHtml += `<option value="${i}" ${i === cy ? 'selected' : ''}>Năm ${i}</option>`;
+      document.getElementById('dashYear').innerHTML = yHtml;
+      let mHtml = '<option value="ALL">Tất cả Tháng</option>';
+      const cm = new Date().getMonth() + 1;
+      for (let i = 1; i <= 12; i++) mHtml += `<option value="${i}" ${i === cm ? 'selected' : ''}>Tháng ${i}</option>`;
+      document.getElementById('dashMonth').innerHTML = mHtml;
     }
 
     function populateDropdowns() {
       const xuongs = [...new Set(globalData.locations.map(l => l.xuong))].sort();
       let html = '<option value="ALL">Tất cả Xưởng</option>';
       xuongs.forEach(x => html += `<option value="${x}">${x}</option>`);
-      document.getElementById('locXuong').innerHTML = html; document.getElementById('logXuong').innerHTML = html;
+      document.getElementById('locXuong').innerHTML = html;
+      document.getElementById('logXuong').innerHTML = html;
     }
 
-    // ================= ZALO SIMULATOR =================
+    // ---------- Zalo Simulator ----------
     function showZaloNotify(title, message) {
       const sim = document.getElementById('zalo-simulator');
       document.getElementById('zalo-title').innerText = title;
@@ -1175,131 +1031,146 @@
       setTimeout(() => sim.classList.remove('show'), 6000);
     }
 
-    // ================= 1. TAB DASHBOARD (BIỂU ĐỒ TỶ LỆ) =================
-    function clearDashFilter() {
-      document.getElementById('dashYear').value = "ALL";
-      document.getElementById('dashMonth').value = "ALL";
-      renderDashboard();
-    }
-
+    // ---------- Dashboard Rendering (role-based) ----------
     function renderDashboard() {
-      const y = document.getElementById('dashYear').value;
-      const m = document.getElementById('dashMonth').value;
+      const role = globalData.role;
+      const container = document.getElementById('view-dashboard');
+      const y = document.getElementById('dashYear')?.value || 'ALL';
+      const m = document.getElementById('dashMonth')?.value || 'ALL';
 
       let filteredLogs = globalData.logs;
       if (y !== "ALL") filteredLogs = filteredLogs.filter(l => new Date(l.thoi_gian).getFullYear() == parseInt(y));
       if (m !== "ALL") filteredLogs = filteredLogs.filter(l => new Date(l.thoi_gian).getMonth() + 1 == parseInt(m));
 
       const uniqueInspectedTB = [...new Set(filteredLogs.map(l => l.ma_tb))];
-      // Sửa điều kiện lỗi: dùng "Lỗi" và "Hết hạn"
       const errLogs = filteredLogs.filter(i => i.ngoai_quan === 'Lỗi' || i.ap_suat === 'Lỗi' || i.han_sd === 'Hết hạn');
       const brokenQRs = globalData.locations.filter(l => l.qr_broken);
 
-      document.getElementById('st-total').innerText = globalData.locations.length;
-      document.getElementById('st-inspected').innerText = uniqueInspectedTB.length;
-      document.getElementById('st-errors').innerText = errLogs.length;
-      document.getElementById('st-brokenQR').innerText = brokenQRs.length;
-      // Thống kê chưa kiểm tra
-      document.getElementById('st-uninspected').innerText = globalData.locations.length - uniqueInspectedTB.length;
+      if (role === 'USER') {
+        // For User: show simple stats + list of uninspected locations
+        const uninspected = globalData.locations.filter(loc => !uniqueInspectedTB.includes(loc.ma_tb));
+        let html = `
+          <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label"><i data-lucide="layers"></i> Tổng thiết bị</span><p class="stat-value">${globalData.locations.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="check-circle"></i> Đã kiểm tra</span><p class="stat-value">${uniqueInspectedTB.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="eye-off"></i> Chưa kiểm tra</span><p class="stat-value">${uninspected.length}</p></div>
+          </div>
+          <div class="uninspected-list">
+            <h3 style="margin-top:0; display:flex; align-items:center; gap:8px;"><i data-lucide="list"></i> Danh sách vị trí chưa kiểm tra</h3>
+        `;
+        if (uninspected.length === 0) {
+          html += '<p style="color: #10b981; font-weight:600; text-align:center;">✅ Tất cả vị trí đã được kiểm tra!</p>';
+        } else {
+          uninspected.forEach(loc => {
+            html += `
+              <div class="uninspected-item">
+                <div class="uninspected-info">
+                  <span class="ma">${loc.ma_tb}</span>
+                  <span class="khu">${loc.khu_vuc} (${loc.xuong})</span>
+                </div>
+                <a href="scan.html?id=${loc.ma_tb}" target="_blank" class="btn-small"><i data-lucide="camera"></i> Kiểm tra</a>
+              </div>
+            `;
+          });
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        lucide.createIcons();
+      } else {
+        // Admin/Manager: show full dashboard with chart
+        const uninspectedCount = globalData.locations.length - uniqueInspectedTB.length;
+        let html = `
+          <div class="stats-grid">
+            <div class="stat-card"><span class="stat-label"><i data-lucide="layers"></i> Tổng thiết bị</span><p class="stat-value">${globalData.locations.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="check-circle"></i> Đã kiểm tra</span><p class="stat-value">${uniqueInspectedTB.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="alert-triangle"></i> Phát hiện Lỗi</span><p class="stat-value">${errLogs.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="qr-code"></i> Hỏng mã QR</span><p class="stat-value">${brokenQRs.length}</p></div>
+            <div class="stat-card"><span class="stat-label"><i data-lucide="eye-off"></i> Chưa kiểm tra</span><p class="stat-value">${uninspectedCount}</p></div>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:25px;">
+            <div class="content-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">📊 Tỷ lệ hoàn thành theo Xưởng (%)</h3>
+                <div style="display:flex; gap:10px;">
+                  <select id="dashYear" class="form-input" style="width:130px;" onchange="renderDashboard()"></select>
+                  <select id="dashMonth" class="form-input" style="width:130px;" onchange="renderDashboard()"></select>
+                  <button class="btn" style="background:#f1f5f9; color:#64748b;" onclick="clearDashFilter()" title="Xóa lọc">✕</button>
+                </div>
+              </div>
+              <div class="chart-container"><canvas id="progressChart"></canvas></div>
+            </div>
+            <div class="content-card" style="padding: 20px;">
+              <h3 style="margin:0 0 15px 0; font-size:16px; display:flex; align-items:center; gap:8px;"><i data-lucide="calendar-clock"></i> Dự báo Bảo trì</h3>
+              <div id="maintenance-alert-list" style="max-height: 300px; overflow-y: auto;"></div>
+              <p style="font-size:11px; color:#94a3b8; margin-top:10px;">* Thiết bị có báo cáo 'Hết hạn' hoặc 'Lỗi'.</p>
+            </div>
+          </div>
+        `;
+        container.innerHTML = html;
+        lucide.createIcons();
 
-      // Maintenance Forecast logic
-      const forecastList = document.getElementById('maintenance-alert-list');
-      const criticalTB = [...new Set(errLogs.map(l => l.ma_tb))].slice(0, 10);
-      forecastList.innerHTML = criticalTB.length ? criticalTB.map(id => {
-        const lastLog = filteredLogs.find(l => l.ma_tb === id);
-        const xuong = (globalData.locations.find(l => l.ma_tb === id) || { xuong: '?' }).xuong;
-        return `
-            <div style="padding:10px; border:1px solid #fee2e2; background:#fffcfc; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-               <div><b style="font-size:14px; color:var(--primary);">${id}</b> <span style="font-size:11px; color:#64748b;">(${xuong})</span></div>
-               <span class="badge badge-err" style="font-size:9px;">LỖI / HẾT HẠN</span>
-            </div>`;
-      }).join('') : `<div style="text-align:center; padding:20px; color:#94a3b8; font-size:13px;">✅ Hệ thống an toàn</div>`;
+        // Re-attach event listeners for filters
+        document.getElementById('dashYear').addEventListener('change', renderDashboard);
+        document.getElementById('dashMonth').addEventListener('change', renderDashboard);
+        initDateFilters(); // repopulate selects
 
-      drawPercentageChart(uniqueInspectedTB);
+        // Maintenance list
+        const criticalTB = [...new Set(errLogs.map(l => l.ma_tb))].slice(0, 10);
+        const forecastList = document.getElementById('maintenance-alert-list');
+        forecastList.innerHTML = criticalTB.length ? criticalTB.map(id => {
+          const xuong = (globalData.locations.find(l => l.ma_tb === id) || { xuong: '?' }).xuong;
+          return `<div style="padding:10px; border:1px solid #fee2e2; background:#fffcfc; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between;">
+                    <div><b style="color:var(--primary);">${id}</b> <span style="font-size:11px;">(${xuong})</span></div>
+                    <span class="badge badge-err">LỖI/HẾT HẠN</span>
+                  </div>`;
+        }).join('') : '<div style="text-align:center; padding:20px; color:#94a3b8;">✅ Hệ thống an toàn</div>';
 
-      if (errLogs.length > 0 && !window.zaloDemoed) {
-        showZaloNotify("⚠️ CẢNH BÁO PCCC", `Phát hiện ${errLogs.length} thiết bị có lỗi trong dữ liệu vừa tải!`);
-        window.zaloDemoed = true;
+        drawPercentageChart(uniqueInspectedTB);
       }
     }
 
     function drawPercentageChart(uniqueInspectedTB) {
       const xuongs = [...new Set(globalData.locations.map(l => l.xuong))].sort();
-      const percentages = [];
-
-      xuongs.forEach(x => {
+      const percentages = xuongs.map(x => {
         const tbOfXuong = globalData.locations.filter(l => l.xuong === x).map(l => l.ma_tb);
         const total = tbOfXuong.length;
         const ins = uniqueInspectedTB.filter(tb => tbOfXuong.includes(tb)).length;
-        const percent = total > 0 ? Math.round((ins / total) * 100) : 0;
-        percentages.push(percent);
+        return total > 0 ? Math.round((ins / total) * 100) : 0;
       });
-
-      const ctx = document.getElementById('progressChart').getContext('2d');
+      const ctx = document.getElementById('progressChart')?.getContext('2d');
+      if (!ctx) return;
       if (myChart) myChart.destroy();
-
       const grad = ctx.createLinearGradient(0, 0, 0, 400);
       grad.addColorStop(0, '#6366f1'); grad.addColorStop(1, '#ec4899');
-
       myChart = new Chart(ctx, {
-        type: 'bar', data: {
-          labels: xuongs, datasets: [
-            {
-              label: 'Tỷ lệ hoàn thành (%)',
-              data: percentages,
-              backgroundColor: grad,
-              borderRadius: 12,
-              barPercentage: 0.5,
-              borderColor: 'rgba(255,255,255,0.1)',
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              titleFont: { size: 14, weight: 'bold' },
-              padding: 12,
-              cornerRadius: 10,
-              callbacks: { label: (ctx) => ` ${ctx.raw}% Đã kiểm tra` }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true, max: 100,
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              ticks: { color: '#94a3b8' }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#94a3b8' }
-            }
-          }
-        }
+        type: 'bar',
+        data: { labels: xuongs, datasets: [{ label: 'Tỷ lệ hoàn thành (%)', data: percentages, backgroundColor: grad, borderRadius: 12, barPercentage: 0.5 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
       });
     }
 
-    // ================= 2. TAB VỊ TRÍ & CRUD =================
+    function clearDashFilter() {
+      document.getElementById('dashYear').value = "ALL";
+      document.getElementById('dashMonth').value = "ALL";
+      renderDashboard();
+    }
+
+    // ---------- Locations Tab (for Admin/Manager) ----------
     function renderLocations() {
+      if (globalData.role === 'USER') return; // not visible
       const search = document.getElementById('locSearch').value.toLowerCase();
       const xuong = document.getElementById('locXuong').value;
       const hideInspected = document.getElementById('hideInspected').checked;
-
-      // Tập hợp các mã đã được kiểm tra (dựa vào toàn bộ logs)
       const inspectedSet = new Set(globalData.logs.map(log => log.ma_tb));
 
       currentFilteredLocs = globalData.locations.filter(l => 
-        (l.ma_tb.toLowerCase().includes(search)) && 
+        l.ma_tb.toLowerCase().includes(search) && 
         (xuong === 'ALL' || l.xuong === xuong) &&
         (!hideInspected || !inspectedSet.has(l.ma_tb))
       );
 
       const totalPages = Math.ceil(currentFilteredLocs.length / rowsLoc) || 1;
       if (pageLoc > totalPages) pageLoc = totalPages;
-
       document.getElementById('currentLocPage').innerText = pageLoc;
       document.getElementById('totalLocPages').innerText = totalPages;
       document.getElementById('prevLocBtn').disabled = pageLoc === 1;
@@ -1309,28 +1180,33 @@
       const end = start + rowsLoc;
       const paginatedLocs = currentFilteredLocs.slice(start, end);
 
-      const isAdmin = globalData.role === "ADMIN";
+      const isAdmin = globalData.role === 'ADMIN';
+      const actionButtons = document.getElementById('locationActionButtons');
+      actionButtons.innerHTML = isAdmin ? 
+        `<button class="btn btn-success" onclick="openAddLoc()"><i data-lucide="plus"></i> Thêm Vị Trí</button>
+         <button class="btn btn-warning" onclick="printSelected()"><i data-lucide="printer"></i> In đã chọn</button>
+         <button class="btn btn-primary" onclick="printAll()"><i data-lucide="printer"></i> In tất cả</button>` :
+        `<button class="btn btn-warning" onclick="printSelected()"><i data-lucide="printer"></i> In đã chọn</button>
+         <button class="btn btn-primary" onclick="printAll()"><i data-lucide="printer"></i> In tất cả</button>`;
+      lucide.createIcons();
+
       document.getElementById('locations-table').innerHTML = paginatedLocs.map(l => {
         const qrUrl = `https://quickchart.io/qr?size=60&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + l.ma_tb)}`;
         const st = l.qr_broken ? `<span class="badge badge-err">Hỏng QR</span>` : `<span class="badge badge-ok">Tốt</span>`;
         return `<tr>
-            <td><input type="checkbox" class="qr-select" value="${l.ma_tb}"></td>
-            <td><img src="${qrUrl}" style="width:45px; border:1px solid #ccc; padding:2px; border-radius:5px;"></td>
-            <td><b>${l.ma_tb}</b></td><td>${l.xuong}</td><td>${l.khu_vuc}</td><td>${st}</td>
-            <td>
-              <button class="btn btn-primary btn-icon" onclick="openEditLoc('${l.ma_tb}','${l.xuong}','${l.khu_vuc}')" title="Sửa" style="background:#2563eb;"><i data-lucide="edit"></i></button>
-              ${isAdmin ? `<button class="btn btn-danger btn-icon" onclick="deleteLoc('${l.ma_tb}')" title="Xóa Vị Trí"><i data-lucide="trash-2"></i></button>` : ''}
-            </td>
+          <td><input type="checkbox" class="qr-select" value="${l.ma_tb}"></td>
+          <td><img src="${qrUrl}" style="width:45px; border:1px solid #ccc; padding:2px; border-radius:5px;"></td>
+          <td><b>${l.ma_tb}</b></td><td>${l.xuong}</td><td>${l.khu_vuc}</td><td>${st}</td>
+          <td>
+            ${isAdmin ? `<button class="btn btn-primary btn-icon" onclick="openEditLoc('${l.ma_tb}','${l.xuong}','${l.khu_vuc}')" title="Sửa"><i data-lucide="edit"></i></button>` : ''}
+            ${isAdmin ? `<button class="btn btn-danger btn-icon" onclick="deleteLoc('${l.ma_tb}')" title="Xóa"><i data-lucide="trash-2"></i></button>` : ''}
+          </td>
         </tr>`;
       }).join('');
       lucide.createIcons();
     }
 
-    function changeLocPage(dir) {
-      pageLoc += dir;
-      renderLocations();
-    }
-
+    function changeLocPage(dir) { pageLoc += dir; renderLocations(); }
     function openEditLoc(ma, x, kv) {
       document.getElementById('editLocMaTB').innerText = ma;
       document.getElementById('editLocXuong').value = x;
@@ -1343,13 +1219,9 @@
       const x = document.getElementById('editLocXuong').value;
       const kv = document.getElementById('editLocKhuVuc').value;
       const payload = { action: "editLocation", maTB: ma, xuong: x, khuVuc: kv, maNV: maNV };
-
       document.getElementById('editLocModal').style.display = 'none';
       showToast('Đang cập nhật...', 'warning');
-
       await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-
-      // AUTO REFRESH LOCAL DATA
       const loc = globalData.locations.find(l => l.ma_tb === ma);
       if (loc) { loc.xuong = x; loc.khu_vuc = kv; }
       renderLocations(); renderDashboard();
@@ -1357,20 +1229,17 @@
     }
     function deleteLoc(ma) {
       if (globalData.role !== 'ADMIN') return showToast("Quyền hạn không đủ!", "error");
-      showDialog("Xóa Vị Trí", `Bạn có chắc muốn xóa thiết bị ${ma} khỏi cơ sở dữ liệu?`, async (res) => {
+      showDialog("Xóa Vị Trí", `Xóa thiết bị ${ma}?`, async (res) => {
         if (res) {
           const maNV = JSON.parse(localStorage.getItem('pccc_session')).ma;
           showToast('Đang xóa...', 'warning');
           await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "deleteLocation", maTB: ma, maNV: maNV, role: globalData.role }) });
           globalData.locations = globalData.locations.filter(l => l.ma_tb !== ma);
-          renderLocations(); renderDashboard(); showToast('Đã xóa thành công!', 'success');
+          renderLocations(); renderDashboard(); showToast('Đã xóa!', 'success');
         }
       });
     }
-
-    function openAddLoc() {
-      document.getElementById('addLocModal').style.display = 'flex';
-    }
+    function openAddLoc() { document.getElementById('addLocModal').style.display = 'flex'; }
     async function submitAddLoc() {
       const maNV = JSON.parse(localStorage.getItem('pccc_session')).ma;
       const payload = {
@@ -1383,11 +1252,10 @@
       };
       if (!payload.maTB) return showToast("Nhập mã thiết bị!", "warning");
       document.getElementById('addLocModal').style.display = 'none';
-      showToast('Đang thêm vị trí...', 'warning');
+      showToast('Đang thêm...', 'warning');
       await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-      showToast("Thành công! Vui lòng F5 để đồng bộ hoàn toàn.", "success");
+      showToast("Thành công! Vui lòng F5 để đồng bộ.", "success");
     }
-
     function printSelected() {
       let sel = Array.from(document.querySelectorAll('.qr-select:checked')).map(cb => cb.value);
       if (!sel.length) return showToast("Chọn ít nhất 1 vị trí để in!", "warning");
@@ -1397,21 +1265,14 @@
     function executePrint(ids) {
       const area = document.getElementById('printArea');
       area.innerHTML = globalData.locations.filter(l => ids.includes(l.ma_tb)).map(loc => `
-            <div class="ticket">
-              <img src="https://quickchart.io/qr?size=150&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + loc.ma_tb)}">
-              <h3>${loc.ma_tb}</h3>
-              <p>${loc.xuong}</p>
-              <p style="font-size:10px;">${loc.khu_vuc}</p>
-            </div>`).join('');
-
-      // Chờ ảnh QR tải một chút trước khi in
-      setTimeout(() => {
-        window.print();
-        area.innerHTML = ''; // Xóa sau khi in xong
-      }, 500);
+        <div class="ticket">
+          <img src="https://quickchart.io/qr?size=150&text=${encodeURIComponent(DOMAIN + "/scan.html?id=" + loc.ma_tb)}">
+          <h3>${loc.ma_tb}</h3><p>${loc.xuong}</p><p style="font-size:10px;">${loc.khu_vuc}</p>
+        </div>`).join('');
+      setTimeout(() => { window.print(); area.innerHTML = ''; }, 500);
     }
 
-    // ================= 3. TAB NHẬT KÝ =================
+    // ---------- Logs Tab ----------
     window.renderLogs = function () {
       const date = document.getElementById('logDate').value;
       const xuong = document.getElementById('logXuong').value;
@@ -1423,7 +1284,6 @@
         const logDateStr = new Date(log.thoi_gian).toISOString().split('T')[0];
         const matchDate = !date || logDateStr === date;
         const matchXuong = xuong === 'ALL' || locInfo.xuong === xuong;
-        // Sửa điều kiện lỗi: dùng "Lỗi" và "Hết hạn"
         const isErr = log.ngoai_quan === 'Lỗi' || log.ap_suat === 'Lỗi' || log.han_sd === 'Hết hạn';
         const matchStatus = status === 'ALL' || (status === 'ERRORS' && isErr);
         const matchSearch = log.ma_tb.toLowerCase().includes(search) || (log.ten_nv && log.ten_nv.toLowerCase().includes(search));
@@ -1432,7 +1292,6 @@
 
       const totalPages = Math.ceil(currentFilteredLogs.length / rowsLog) || 1;
       if (pageLog > totalPages) pageLog = totalPages;
-
       document.getElementById('currentLogPage').innerText = pageLog;
       document.getElementById('totalLogPages').innerText = totalPages;
       document.getElementById('prevLogBtn').disabled = pageLog === 1;
@@ -1443,20 +1302,29 @@
       const paginatedLogs = currentFilteredLogs.slice(start, end);
 
       const isAdmin = globalData.role === 'ADMIN';
+      const isManager = globalData.role === 'MANAGER';
+      // Action buttons: Admin sees email and export; Manager maybe sees export only? We'll keep export for all.
+      const actionDiv = document.getElementById('logActionButtons');
+      actionDiv.innerHTML = isAdmin ? 
+        `<button class="btn btn-warning" onclick="prepSendMail('single')"><i data-lucide="mail"></i> Email đã chọn</button>
+         <button class="btn btn-success" onclick="prepSendMail('mass')"><i data-lucide="file-text"></i> Gửi Bảng</button>
+         <button class="btn" style="background:#10b981;" onclick="exportLogsToCSV()"><i data-lucide="download"></i> Xuất CSV</button>` :
+        `<button class="btn" style="background:#10b981;" onclick="exportLogsToCSV()"><i data-lucide="download"></i> Xuất CSV</button>`;
+      lucide.createIcons();
+
       document.getElementById('logs-table').innerHTML = paginatedLogs.map(log => {
         const locInfo = globalData.locations.find(l => l.ma_tb === log.ma_tb) || { xuong: '?' };
         const isErr = log.ngoai_quan === 'Lỗi' || log.ap_suat === 'Lỗi' || log.han_sd === 'Hết hạn';
         const stUI = isErr ? `<span class="badge badge-err">LỖI</span>` : `<span class="badge badge-ok">ĐẠT</span>`;
         const logStr = encodeURIComponent(JSON.stringify(log));
-
         return `<tr>
           <td><input type="checkbox" class="log-select" value="${logStr}"></td>
           <td style="font-size:13px;">${new Date(log.thoi_gian).toLocaleString('vi-VN')}</td>
           <td>${locInfo.xuong}</td><td><b>${log.ma_tb}</b></td><td>${log.ten_nv}</td>
-          <td>${stUI}</td><td style="color:#dc2626; font-size:13px; max-width:150px; overflow:hidden; text-overflow:ellipsis;">${log.ghi_chu || ''}</td>
-          <td>${log.link_anh ? `<img src="${log.link_anh}" class="img-thumb" onclick="window.open('${log.link_anh}')" title="Xem ảnh lớn">` : ''}</td>
+          <td>${stUI}</td><td style="color:#dc2626; max-width:150px;">${log.ghi_chu || ''}</td>
+          <td>${log.link_anh ? `<img src="${log.link_anh}" class="img-thumb" onclick="window.open('${log.link_anh}')">` : ''}</td>
           <td>
-            <button class="btn btn-primary btn-icon" onclick="openEditLog('${logStr}')" title="Sửa" style="background:#2563eb;"><i data-lucide="edit"></i></button>
+            ${isAdmin ? `<button class="btn btn-primary btn-icon" onclick="openEditLog('${logStr}')" title="Sửa"><i data-lucide="edit"></i></button>` : ''}
             ${isAdmin ? `<button class="btn btn-danger btn-icon" onclick="deleteLog('${log.thoi_gian}', '${log.ma_tb}')" title="Xóa"><i data-lucide="trash-2"></i></button>` : ''}
           </td>
         </tr>`;
@@ -1464,10 +1332,7 @@
       lucide.createIcons();
     };
 
-    function changeLogPage(dir) {
-      pageLog += dir;
-      renderLogs();
-    }
+    function changeLogPage(dir) { pageLog += dir; renderLogs(); }
 
     function openEditLog(logStr) {
       const log = JSON.parse(decodeURIComponent(logStr));
@@ -1479,7 +1344,7 @@
       document.getElementById('editNq').value = log.ngoai_quan === 'Lỗi' ? 'Lỗi' : 'Đạt';
       document.getElementById('editAs').value = log.ap_suat === 'Lỗi' ? 'Lỗi' : 'Đạt';
       document.getElementById('editHs').value = log.han_sd === 'Hết hạn' ? 'Hết hạn' : 'Còn hạn';
-      document.getElementById('editGc').value = log.ghi_chu !== 'undefined' ? log.ghi_chu : '';
+      document.getElementById('editGc').value = log.ghi_chu || '';
       document.getElementById('editLogModal').style.display = 'flex';
     }
 
@@ -1487,58 +1352,47 @@
       const maNV = JSON.parse(localStorage.getItem('pccc_session')).ma;
       const ma = document.getElementById('editMaTB').innerText;
       const tg = document.getElementById('editThoiGian').value;
-      const nq = document.getElementById('editNq').value; // giữ nguyên "Lỗi" / "Đạt"
+      const nq = document.getElementById('editNq').value;
       const as = document.getElementById('editAs').value;
-      const hs = document.getElementById('editHs').value; // "Hết hạn" / "Còn hạn"
+      const hs = document.getElementById('editHs').value;
       const gc = document.getElementById('editGc').value;
-
       const payload = { action: "editLog", thoiGian: tg, maTB: ma, ngoaiQuan: nq, apSuat: as, hanSD: hs, ghiChu: gc, maNV: maNV };
       document.getElementById('editLogModal').style.display = 'none';
-      showToast('Đang lưu thay đổi...', 'warning');
-
+      showToast('Đang lưu...', 'warning');
       await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-
-      // AUTO REFRESH LOCAL DATA
       const log = globalData.logs.find(l => l.thoi_gian === tg && l.ma_tb === ma);
-      if (log) {
-        log.ngoai_quan = nq;
-        log.ap_suat = as;
-        log.han_sd = hs;
-        log.ghi_chu = gc;
-      }
+      if (log) { log.ngoai_quan = nq; log.ap_suat = as; log.han_sd = hs; log.ghi_chu = gc; }
       renderLogs(); renderDashboard();
-      showToast("Đã cập nhật báo cáo!", "success");
+      showToast("Đã cập nhật!", "success");
     }
 
     function deleteLog(tg, maTB) {
       if (globalData.role !== 'ADMIN') return showToast("Quyền hạn không đủ!", "error");
-      showDialog("Xóa Nhật Ký", `Xóa vĩnh viễn báo cáo của ${maTB}?`, async (res) => {
+      showDialog("Xóa Nhật Ký", `Xóa báo cáo của ${maTB}?`, async (res) => {
         if (res) {
           const maNV = JSON.parse(localStorage.getItem('pccc_session')).ma;
           showToast('Đang xóa...', 'warning');
           await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "deleteLog", thoiGian: tg, maTB: maTB, maNV: maNV, role: globalData.role }) });
           globalData.logs = globalData.logs.filter(l => !(l.thoi_gian === tg && l.ma_tb === maTB));
-          renderDashboard(); renderLogs(); showToast('Đã xóa thành công!', 'success');
+          renderDashboard(); renderLogs(); showToast('Đã xóa!', 'success');
         }
       });
     }
 
-    // ================= 4. EMAIL ĐA MẪU =================
+    // ---------- Email Templates (Admin only) ----------
     function renderTemplates() {
+      if (globalData.role !== 'ADMIN') return;
       const container = document.getElementById('template-list');
       container.innerHTML = globalData.templates.map((t, index) => `
-            <div class="template-box">
-                <input type="text" class="form-input t-name" value="${t.name}" style="font-weight:bold; color:var(--primary);">
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1"><label style="font-size:12px;">Gửi đến (TO):</label><input type="text" class="form-input t-to" value="${t.to}"></div>
-                    <div style="flex:1"><label style="font-size:12px;">Đồng kính gửi (CC):</label><input type="text" class="form-input t-cc" value="${t.cc}"></div>
-                </div>
-                <label style="font-size:12px;">Tiêu đề:</label>
-                <input type="text" class="form-input t-sub" value="${t.subject}">
-                <label style="font-size:12px;">Nội dung HTML ([MA_TB], [XUONG], [GHI_CHU], [BANG_BAO_CAO]):</label>
-                <textarea class="form-input t-body" rows="4">${t.body}</textarea>
-            </div>
-        `).join('');
+        <div class="template-box">
+          <input type="text" class="form-input t-name" value="${t.name}" style="font-weight:bold;">
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1"><label style="font-size:12px;">Gửi đến (TO):</label><input type="text" class="form-input t-to" value="${t.to}"></div>
+            <div style="flex:1"><label style="font-size:12px;">CC:</label><input type="text" class="form-input t-cc" value="${t.cc}"></div>
+          </div>
+          <label style="font-size:12px;">Tiêu đề:</label><input type="text" class="form-input t-sub" value="${t.subject}">
+          <label style="font-size:12px;">Nội dung HTML:</label><textarea class="form-input t-body" rows="4">${t.body}</textarea>
+        </div>`).join('');
       lucide.createIcons();
     }
 
@@ -1546,38 +1400,34 @@
       const container = document.getElementById('template-list');
       const div = document.createElement('div'); div.className = 'template-box';
       div.innerHTML = `
-            <input type="text" class="form-input t-name" value="Mẫu Mới" style="font-weight:bold; color:var(--primary);">
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1"><label style="font-size:12px;">Gửi đến (TO):</label><input type="text" class="form-input t-to"></div>
-                <div style="flex:1"><label style="font-size:12px;">CC:</label><input type="text" class="form-input t-cc"></div>
-            </div>
-            <label style="font-size:12px;">Tiêu đề:</label><input type="text" class="form-input t-sub">
-            <label style="font-size:12px;">Nội dung HTML:</label><textarea class="form-input t-body" rows="4"></textarea>
-        `;
+        <input type="text" class="form-input t-name" value="Mẫu Mới" style="font-weight:bold;">
+        <div style="display:flex; gap:10px;"><div style="flex:1"><label>TO:</label><input type="text" class="form-input t-to"></div><div style="flex:1"><label>CC:</label><input type="text" class="form-input t-cc"></div></div>
+        <label>Tiêu đề:</label><input type="text" class="form-input t-sub">
+        <label>Nội dung HTML:</label><textarea class="form-input t-body" rows="4"></textarea>`;
       container.appendChild(div); lucide.createIcons();
     }
 
     async function saveTemplates() {
       const boxes = document.querySelectorAll('.template-box');
       const newTemplates = Array.from(boxes).map(box => ({
-        name: box.querySelector('.t-name').value, to: box.querySelector('.t-to').value, cc: box.querySelector('.t-cc').value,
-        subject: box.querySelector('.t-sub').value, body: box.querySelector('.t-body').value
+        name: box.querySelector('.t-name').value, to: box.querySelector('.t-to').value,
+        cc: box.querySelector('.t-cc').value, subject: box.querySelector('.t-sub').value,
+        body: box.querySelector('.t-body').value
       }));
-      showToast('Đang lưu hệ thống Email...', 'warning');
+      showToast('Đang lưu...', 'warning');
       await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "saveSettings", templates: newTemplates }) });
       globalData.templates = newTemplates;
       showToast("Lưu thành công!", "success");
     }
 
-    // GỬI MAIL THEO MẪU ĐÃ CHỌN
+    // ---------- Email Sending (Admin/Manager) ----------
     function prepSendMail(type) {
       if (type === 'single') {
         const selected = Array.from(document.querySelectorAll('.log-select:checked')).map(cb => JSON.parse(decodeURIComponent(cb.value)));
-        if (!selected.length) return showToast("Chọn ít nhất 1 mục để gửi!", "warning");
+        if (!selected.length) return showToast("Chọn ít nhất 1 mục!", "warning");
       } else {
         if (!currentFilteredLogs.length) return showToast("Không có dữ liệu trong bảng lọc!", "warning");
       }
-
       let options = globalData.templates.map((t, i) => `<option value="${i}">${t.name}</option>`).join('');
       document.getElementById('emailTemplateSelect').innerHTML = options;
       document.getElementById('emailType').value = type;
@@ -1598,10 +1448,8 @@
       const t = globalData.templates[idx];
       const toEmails = document.getElementById('emailTo').value;
       const ccEmails = document.getElementById('emailCc').value;
-
       document.getElementById('emailDialog').style.display = 'none';
-      showToast('Hệ thống đang bắt đầu gửi Mail...', 'warning');
-
+      showToast('Đang gửi mail...', 'warning');
       try {
         if (type === 'single') {
           const selected = Array.from(document.querySelectorAll('.log-select:checked')).map(cb => JSON.parse(decodeURIComponent(cb.value)));
@@ -1609,23 +1457,31 @@
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendEmails", type: "single", to: toEmails, cc: ccEmails, subject: t.subject, body: t.body, log: log }) });
           }
         } else {
-          let htmlTable = `<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;"><tr style="background:#0f172a; color:white;"><th>Mã Thiết Bị</th><th>Nhân viên</th><th>Ngày kiểm</th><th>Trạng thái</th><th>Ghi chú</th></tr>`;
+          let htmlTable = `<table border="1" cellpadding="8" style="border-collapse:collapse; width:100%;"><tr style="background:#0f172a; color:white;"><th>Mã TB</th><th>Nhân viên</th><th>Ngày</th><th>Trạng thái</th><th>Ghi chú</th></tr>`;
           currentFilteredLogs.forEach(log => {
             let st = (log.ngoai_quan === 'Lỗi' || log.ap_suat === 'Lỗi') ? "<b style='color:red;'>LỖI</b>" : "<b style='color:green;'>ĐẠT</b>";
-            htmlTable += `<tr><td>${log.ma_tb}</td><td>${log.ten_nv}</td><td>${new Date(log.thoi_gian).toLocaleDateString('vi-VN')}</td><td>${st}</td><td style="color:red;">${log.ghi_chu}</td></tr>`;
+            htmlTable += `<tr><td>${log.ma_tb}</td><td>${log.ten_nv}</td><td>${new Date(log.thoi_gian).toLocaleDateString('vi-VN')}</td><td>${st}</td><td>${log.ghi_chu || ''}</td></tr>`;
           });
-          let finalBody = t.body.replace("[BANG_BAO_CAO]", htmlTable + "</table>");
+          htmlTable += '</table>';
+          let finalBody = t.body.replace("[BANG_BAO_CAO]", htmlTable);
           await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: "sendEmails", type: "mass", to: toEmails, cc: ccEmails, subject: t.subject, body: finalBody }) });
         }
-        showToast("Đã hoàn tất việc gửi Email!", "success");
+        showToast("Gửi mail hoàn tất!", "success");
       } catch (e) { showToast("Gửi mail thất bại!", "error"); }
     }
 
-    // Hàm exportLogsToCSV cần được định nghĩa nếu chưa có (giữ nguyên code cũ)
+    // Dummy export function (you can implement CSV export if needed)
     function exportLogsToCSV() {
-      // Giữ nguyên code cũ của bạn, không thay đổi
+      let csv = "Thời gian,Mã NV,Tên NV,Mã TB,Ngoại quan,Áp suất,Hạn SD,Ghi chú,Link Ảnh\n";
+      currentFilteredLogs.forEach(log => {
+        csv += `"${log.thoi_gian}","${log.ma_nv}","${log.ten_nv}","${log.ma_tb}","${log.ngoai_quan}","${log.ap_suat}","${log.han_sd}","${log.ghi_chu}","${log.link_anh}"\n`;
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' }); // BOM for UTF-8
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'pccc_logs.csv';
+      link.click();
     }
   </script>
 </body>
-
 </html>
