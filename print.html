@@ -1,50 +1,173 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
-  <title>In Tem QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>In Tem QR Code - PCCC Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial; padding: 20px; background: #e2e8f0;}
-    .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
-    .btn { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight:bold;}
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: white; padding: 20px; max-width: 210mm; margin: auto;}
-    .ticket { border: 1px dashed #ccc; padding: 10px; text-align: center; page-break-inside: avoid;}
-    .qr-img { width: 120px; height: 120px; margin-bottom: 5px; }
+    :root {
+      --primary: #e11d48;
+      --primary-glow: rgba(225, 29, 72, 0.2);
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      padding: 30px;
+      background: #f8fafc;
+      background-image: var(--bg-gradient);
+      color: #0f172a;
+      min-height: 100vh;
+    }
+
+    .controls {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 35px;
+      border-radius: 24px;
+      margin-bottom: 30px;
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    .controls h2 {
+      margin-top: 0;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      padding: 16px 40px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 800;
+      box-shadow: 0 8px 15px rgba(225, 29, 72, 0.2);
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      background: #be123c;
+      transform: translateY(-2px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      background: white;
+      padding: 30px;
+      max-width: 210mm;
+      margin: auto;
+      border-radius: 24px;
+      color: #0f172a;
+    }
+
+    .ticket {
+      border: 1px dashed #cbd5e1;
+      padding: 15px;
+      text-align: center;
+      page-break-inside: avoid;
+      border-radius: 12px;
+      transition: 0.2s;
+    }
+
+    .ticket:hover {
+      border-color: var(--primary);
+    }
+
+    .qr-img {
+      width: 140px;
+      height: 140px;
+      margin-bottom: 8px;
+      border: 1px solid #f1f5f9;
+      padding: 5px;
+      border-radius: 10px;
+    }
+
+    #loading {
+      margin-top: 50px;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
     @media print {
-      body { background: white; padding: 0;}
-      .controls { display: none;}
-      .grid { max-width: 100%; padding: 0; border: none;}
-      .ticket { border: 1px solid #000;}
+      body {
+        background: white !important;
+        background-image: none !important;
+        padding: 0 !important;
+        color: black !important;
+      }
+
+      .controls {
+        display: none !important;
+      }
+
+      .grid {
+        max-width: 100% !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+
+      .ticket {
+        border: 1px solid #000 !important;
+        border-radius: 0 !important;
+      }
+
+      .ticket:hover {
+        border-color: #000 !important;
+      }
+
+      .qr-img {
+        border: none !important;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="controls">
-    <h2>🖨️ XUẤT FILE IN TEM QR CODE TỪ GOOGLE SHEET</h2>
-    <button class="btn" onclick="window.print()">IN RA GIẤY A4</button>
+    <h2>🖨️ XUẤT FILE IN TEM QR CODE CHUYÊN NGHIỆP</h2>
+    <p style="color:#94a3b8;">Hệ thống tự động tạo mã QR cho từng thiết bị PCCC. Thiết lập sẵn cho khổ giấy A4.</p>
+    <button class="btn" onclick="window.print()">IN BẢN TRÌNH QUẢN LÝ</button>
   </div>
-  <h3 id="loading" style="text-align: center;">⏳ Đang tải dữ liệu từ Google Sheets...</h3>
-  <div class="grid" id="printArea"></div>
+
+  <div id="loading" style="text-align: center;">⏳ ĐANG KẾT NỐI VỚI HỆ THỐNG DỮ LIỆU...</div>
+  <div class="grid" id="printArea" style="display:none;"></div>
 
   <script>
     // ĐIỀN LINK GOOGLE SCRIPT VÀ TÊN MIỀN VÀO ĐÂY
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxJH_M_NsHiwt5yfDblW46eClpwxiuxDKkbERdgx5mCAw-plxwm3RTZI5K0CvbiWjR6Q/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0I2_gFe5IyzbUeMToKWXdGCiZm04Wr0iDzyqD9Yf4CQ-jun4ZJjuFpxzSrBh1TKrqaA/exec";
     const DOMAIN = "https://molniyal.github.io/quan-ly-pccc/";
 
     window.onload = async () => {
-      const maNv = localStorage.getItem('pccc_admin');
-      if(!maNv) return alert("Vui lòng đăng nhập ở trang Admin trước khi in tem!");
+      const savedUser = JSON.parse(localStorage.getItem('pccc_session'));
+      if (!savedUser) return alert("Vui lòng đăng nhập ở trang Dashboard chính trước khi in tem!");
 
       const reqId = new URLSearchParams(window.location.search).get('id');
 
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=getDashboardData&maNV=${maNv}`);
+        const res = await fetch(`${SCRIPT_URL}?action=getDashboardData&maNV=${savedUser.ma}&matKhau=${savedUser.pass}`);
         const data = await res.json();
-        
+
         document.getElementById('loading').style.display = 'none';
-        
+        document.getElementById('printArea').style.display = 'grid';
+
         let targetLocations = data.locations;
-        if(reqId && reqId !== 'ALL') {
+        if (reqId && reqId !== 'ALL') {
           targetLocations = data.locations.filter(l => l.ma_tb === reqId);
         }
 
@@ -54,15 +177,18 @@
           return `
             <div class="ticket">
               <img src="${qrUrl}" class="qr-img">
-              <h3 style="margin:5px 0;">${loc.ma_tb}</h3>
-              <p style="margin:0; font-size:12px; color:#64748b;">${loc.xuong} - ${loc.khu_vuc}</p>
+              <h4 style="margin:5px 0; font-weight:800; font-size:16px;">${loc.ma_tb}</h4>
+              <p style="margin:0; font-size:11px; color:#475569; font-weight:600;">${loc.xuong}</p>
+              <p style="margin:0; font-size:10px; color:#64748b;">${loc.khu_vuc}</p>
             </div>
           `;
         }).join('');
-      } catch(e) {
+      } catch (e) {
         alert("Lỗi tải dữ liệu!");
+        console.error(e);
       }
     };
   </script>
 </body>
+
 </html>

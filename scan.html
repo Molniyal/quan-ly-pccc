@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,75 +8,567 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        :root { --primary: #ff4d4d; --primary-glow: rgba(255, 77, 77, 0.4); --success: #00e676; --danger: #ff1744; --warning: #ffc107; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); --text-main: #ffffff; --text-muted: rgba(255, 255, 255, 0.6); --toast-bg: rgba(10, 10, 20, 0.9); --shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg-gradient); background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 16px; color: var(--text-main); }
-        .app-container { width: 100%; max-width: 480px; background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 32px; padding: 24px 16px; box-shadow: var(--shadow); animation: fadeIn 0.8s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .header-section { text-align: center; margin-bottom: 24px; }
-        .header-section h2 { font-size: 28px; font-weight: 800; background: linear-gradient(to right, #fff, #ff4d4d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header-section p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
-        .section-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; padding: 18px 16px; margin-bottom: 20px;}
-        .section-title { font-weight: 600; font-size: 13px; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 12px; }
-        .id-badge { background: rgba(0, 0, 0, 0.3); border-radius: 16px; padding: 14px 16px; font-family: 'Outfit', monospace; font-weight: 700; font-size: 18px; text-align: center; color: var(--primary); border: 1px dashed var(--primary); word-break: break-word; flex:1;}
-        .input-field { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px 16px; color: white; font-size: 16px;}
-        .input-field:focus { border-color: var(--primary); outline: none;}
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-        .btn-group input[type="radio"] { display: none; }
-        .btn-group label { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); border-radius: 20px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s; font-weight: 500;}
-        .btn-group label .btn-icon { font-size: 24px; margin-bottom: 4px; filter: grayscale(1); opacity: 0.8;}
-        input[type="radio"]:checked + label { border-color: transparent; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-        input[type="radio"]:checked + label .btn-icon { filter: grayscale(0); opacity: 1; }
-        input[value="Đạt"]:checked + label, input[value="Còn hạn"]:checked + label { background: var(--success); color: #000; }
-        input[value="Lỗi"]:checked + label, input[value="Hết hạn"]:checked + label { background: var(--danger); }
-        #box-ghichu { margin-top: 15px; display: none;}
-        .file-upload-card { border: 2px dashed var(--glass-border); border-radius: 24px; padding: 32px 16px; text-align: center; cursor: pointer; background: rgba(255, 255, 255, 0.02); }
-        #anhChup { display: none; }
-        #previewBox { position: relative; display: none; margin-top: 12px; }
-        #previewAnh { width: 100%; border-radius: 20px; border: 2px solid var(--success); }
-        .remove-image { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; }
-        .btn-submit { width: 100%; padding: 18px; background: linear-gradient(90deg, #ff4d4d, #f44336); color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 16px;}
-        .btn-submit:disabled { background: #444; opacity: 0.5; pointer-events: none; }
-        #loading-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.1); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        #toast { position: fixed; bottom: 24px; left: 16px; right: 16px; background: var(--toast-bg); color: white; padding: 14px 20px; border-radius: 50px; text-align: center; font-weight: 500; display: none; z-index: 2500;}
-        #toast.success { background: rgba(0,230,118,0.9); color: #000; } #toast.error { background: rgba(255,23,68,0.9); }
-        #qr-reader { width: 100%; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 12px; border: 2px solid var(--primary); background: #000; }
-        #qr-reader video { width: 100% !important; border-radius: 16px; object-fit: cover; }
-        .close-scanner { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; z-index: 10;}
-        .employee-info { margin-top: 12px; padding: 12px; border-radius: 16px; font-weight: 600; text-align: center; background: rgba(0,0,0,0.2); }
-        .employee-info.success { background: rgba(0,230,118,0.15); color: var(--success); }
-        .employee-info.error { background: rgba(255,23,68,0.15); color: #ff8a80; }
-        .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 40px; padding: 10px 16px; color: white; font-size: 14px; cursor: pointer; margin-top: 8px; width: 100%; }
-        #warning-duplicate { background: rgba(255,23,68,0.2); border: 1px solid var(--danger); color: #ff8a80; padding: 14px; border-radius: 20px; margin-bottom: 20px; text-align: center; font-weight: 600; display: none; }
+        :root {
+            --primary: #e11d48;
+            /* Fire Red */
+            --primary-hover: #be123c;
+            --primary-glow: rgba(225, 29, 72, 0.1);
+            --secondary: #475569;
+            --success: #10b981;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --toast-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f8fafc;
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 16px;
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Subtle Background Blobs */
+        .blob {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: rgba(225, 29, 72, 0.05);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 18s infinite alternate;
+        }
+
+        .blob-2 {
+            top: 60%;
+            left: 40%;
+            background: rgba(0, 0, 0, 0.02);
+            animation-delay: -4s;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(-10%, -10%);
+            }
+
+            to {
+                transform: translate(15%, 20%);
+            }
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 32px;
+            padding: 32px 20px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-section h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+        }
+
+        .header-section p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        .section-title {
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #64748b;
+            display: block;
+            margin-bottom: 15px;
+            letter-spacing: 0.08em;
+        }
+
+        .status-badge-live {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-badge-live.ok {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbfcce;
+        }
+
+        .status-badge-live.err {
+            background: #fff1f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .id-badge {
+            background: #fff1f2;
+            border-radius: 16px;
+            padding: 16px;
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 20px;
+            text-align: center;
+            color: var(--primary);
+            border: 1px solid #fecaca;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #fbfcfd;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 16px;
+            color: var(--text-main);
+            font-size: 16px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.08);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .btn-group input[type="radio"] {
+            display: none;
+        }
+
+        .btn-group label {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .btn-group label .btn-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        input[type="radio"]:checked+label {
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+            color: white;
+        }
+
+        input[type="radio"]:checked+label .btn-icon {
+            opacity: 1;
+            filter: grayscale(0);
+        }
+
+        input[value="Đạt"]:checked+label,
+        input[value="Còn hạn"]:checked+label {
+            background: #10b981 !important;
+        }
+
+        input[value="Lỗi"]:checked+label,
+        input[value="Hết hạn"]:checked+label {
+            background: #e11d48 !important;
+        }
+
+        #box-ghichu {
+            margin-top: 15px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-upload-card {
+            border: 2px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #fbfcfd;
+            transition: 0.2s;
+        }
+
+        .file-upload-card:hover {
+            border-color: var(--primary);
+            background: #fff1f2;
+        }
+
+        #anhChup {
+            display: none;
+        }
+
+        #previewBox {
+            position: relative;
+            display: none;
+            margin-top: 15px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        #previewAnh {
+            width: 100%;
+            border-radius: 20px;
+            border: 2px solid #10b981;
+            display: block;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(225, 29, 72, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            background: #cbd5e1;
+            opacity: 1;
+            box-shadow: none;
+            pointer-events: none;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: #ffffff;
+            color: var(--text-main);
+            padding: 15px 24px;
+            border-radius: 16px;
+            text-align: center;
+            font-weight: 700;
+            display: none;
+            z-index: 2500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            animation: slideUpToast 0.4s ease-out;
+        }
+
+        @keyframes slideUpToast {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #qr-reader {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            display: none;
+            margin-bottom: 15px;
+            border: 2px solid var(--primary);
+            background: #000;
+        }
+
+        .close-scanner {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .employee-info {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 14px;
+            font-weight: 800;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .employee-info.success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbfcce;
+        }
+
+        .employee-info.error {
+            background: #fff1f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 10px 16px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        #warning-duplicate {
+            background: #fff1f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 14px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 700;
+            display: none;
+        }
+
+        /* ZALO MOCK NOTIFICATION */
+        #zalo-simulator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            background: #0068ff;
+            color: white;
+            padding: 16px;
+            border-radius: 18px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            transform: translateY(-150px);
+            transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #zalo-simulator.show {
+            transform: translateY(0);
+        }
+
+        .zalo-icon {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .zalo-content div:first-child {
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .zalo-content div:last-child {
+            font-size: 12px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
     </style>
 </head>
+
 <body>
-    <div id="loading-overlay"><div class="spinner"></div><div id="loading-text">Đang xử lý...</div></div>
+    <div class="blob"></div>
+    <div class="blob blob-2"></div>
+
+    <div id="zalo-simulator">
+        <div class="zalo-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg"
+                width="30"></div>
+        <div class="zalo-content">
+            <div id="zalo-title">Hệ Thống PCCC</div>
+            <div id="zalo-body">Thông báo mới...</div>
+        </div>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-text">Đang xử lý...</div>
+    </div>
     <div id="toast"></div>
 
     <div class="app-container">
-        <div class="header-section"><h2>PCCC DIGITAL</h2><p>Smart Inspection · Pro</p></div>
+        <div class="header-section">
+            <h2>PCCC DIGITAL</h2>
+            <p>Smart Inspection · Pro</p>
+        </div>
 
         <div id="warning-duplicate">⚠️ VỊ TRÍ NÀY ĐÃ ĐƯỢC KIỂM TRA TRONG THÁNG!</div>
 
         <div class="section-card">
             <label class="section-title">📍 Mã vị trí / thiết bị</label>
+            <span id="st-ma" class="status-badge-live"></span>
             <div id="qr-reader"><button class="close-scanner" id="closeScannerBtn">✕</button></div>
 
             <div style="display: flex; gap: 10px; align-items: stretch;">
                 <div id="maTB_Badge" class="id-badge">WAITING QR...</div>
-                <button id="btnScanner" style="background: var(--primary); border: none; border-radius: 16px; padding: 0 18px; cursor: pointer; color: white; font-size: 24px;">📷</button>
+                <button id="btnScanner"
+                    style="background: var(--primary); border: none; border-radius: 18px; padding: 0 18px; cursor: pointer; color: white; font-size: 24px;">📷</button>
             </div>
             <input type="hidden" id="maTB">
 
             <button id="showManualBtn" class="btn-secondary">⌨️ Nhập tay (khi QR hỏng)</button>
             <div id="manualInputContainer" style="display:none; margin-top:12px;">
                 <input type="text" id="manualMaTB" class="input-field" placeholder="Mã bình (VD: BCC-01)">
-                <input type="text" id="manualCode" class="input-field" placeholder="Mã xác thực hỏng (Nhập 1111)" style="margin-top:8px;">
+                <input type="text" id="manualCode" class="input-field" placeholder="Mã xác thực hỏng (Nhập 1111)"
+                    style="margin-top:8px;">
                 <div style="display: flex; gap:8px; margin-top:8px;">
-                    <button id="applyManualBtn" class="btn-secondary" style="background: var(--primary);">Xác nhận Hỏng</button>
+                    <button id="applyManualBtn" class="btn-secondary" style="background: var(--primary);">Xác nhận
+                        Hỏng</button>
                     <button id="cancelManualBtn" class="btn-secondary">Hủy</button>
                 </div>
             </div>
@@ -83,37 +576,50 @@
 
         <div class="section-card">
             <label class="section-title">👤 Nhân viên kiểm tra</label>
-            <input type="text" id="maNV" class="input-field" placeholder="NHẬP MÃ NV..." autocomplete="off" style="text-transform: uppercase;">
+            <span id="st-nv" class="status-badge-live"></span>
+            <input type="text" id="maNV" class="input-field" placeholder="NHẬP MÃ NV..." autocomplete="off"
+                style="text-transform: uppercase;">
             <div id="tenNV_Display" class="employee-info" style="display: none;"></div>
         </div>
 
         <div class="section-card">
             <label class="section-title">🔎 Trạng thái thiết bị</label>
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">Ngoại quan</p>
+            <span id="st-device" class="status-badge-live"></span>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">Ngoại quan</p>
             <div class="btn-group" style="margin-bottom:15px;">
-                <input type="radio" id="nq-dat" name="ngoaiQuan" value="Đạt" checked><label for="nq-dat"><span class="btn-icon">✅</span><span>ĐẠT</span></label>
-                <input type="radio" id="nq-loi" name="ngoaiQuan" value="Lỗi"><label for="nq-loi"><span class="btn-icon">❌</span><span>LỖI</span></label>
+                <input type="radio" id="nq-dat" name="ngoaiQuan" value="Đạt" checked><label for="nq-dat"><span
+                        class="btn-icon">✅</span><span>ĐẠT</span></label>
+                <input type="radio" id="nq-loi" name="ngoaiQuan" value="Lỗi"><label for="nq-loi"><span
+                        class="btn-icon">❌</span><span>LỖI</span></label>
             </div>
 
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">Áp suất</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">Áp suất</p>
             <div class="btn-group" style="margin-bottom:15px;">
-                <input type="radio" id="as-dat" name="apSuat" value="Đạt" checked><label for="as-dat"><span class="btn-icon">⚡</span><span>OK</span></label>
-                <input type="radio" id="as-loi" name="apSuat" value="Lỗi"><label for="as-loi"><span class="btn-icon">⚠️</span><span>LỖI</span></label>
+                <input type="radio" id="as-dat" name="apSuat" value="Đạt" checked><label for="as-dat"><span
+                        class="btn-icon">⚡</span><span>OK</span></label>
+                <input type="radio" id="as-loi" name="apSuat" value="Lỗi"><label for="as-loi"><span
+                        class="btn-icon">⚠️</span><span>LỖI</span></label>
             </div>
 
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">Hạn sử dụng</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">Hạn sử dụng</p>
             <div class="btn-group">
-                <input type="radio" id="hsd-con" name="hanSD" value="Còn hạn" checked><label for="hsd-con"><span class="btn-icon">📅</span><span>CÒN HẠN</span></label>
-                <input type="radio" id="hsd-het" name="hanSD" value="Hết hạn"><label for="hsd-het"><span class="btn-icon">⌛</span><span>HẾT HẠN</span></label>
+                <input type="radio" id="hsd-con" name="hanSD" value="Còn hạn" checked><label for="hsd-con"><span
+                        class="btn-icon">📅</span><span>CÒN HẠN</span></label>
+                <input type="radio" id="hsd-het" name="hanSD" value="Hết hạn"><label for="hsd-het"><span
+                        class="btn-icon">⌛</span><span>HẾT HẠN</span></label>
             </div>
 
-            <div id="box-ghichu"><textarea id="ghiChu" rows="3" class="input-field" placeholder="Ghi chú chi tiết lỗi..."></textarea></div>
+            <div id="box-ghichu"><textarea id="ghiChu" rows="3" class="input-field"
+                    placeholder="Ghi chú chi tiết lỗi..."></textarea></div>
         </div>
 
         <div class="section-card">
             <label class="section-title">📸 Minh chứng hình ảnh</label>
             <label for="anhChup" id="label-upload">
-                <div class="file-upload-card"><div style="font-size: 42px;">📷</div><div style="font-weight:600;">CHỤP ẢNH HIỆN TRƯỜNG</div></div>
+                <div class="file-upload-card">
+                    <div style="font-size: 42px;">📷</div>
+                    <div style="font-weight:700; margin-top:10px;">CHỤP ẢNH HIỆN TRƯỜNG</div>
+                </div>
             </label>
             <input type="file" id="anhChup" accept="image/*" capture="environment">
             <div id="previewBox">
@@ -127,7 +633,7 @@
     <script>
         // 🔴 1. ĐIỀN LINK GOOGLE SCRIPT MỚI VÀO ĐÂY:
         const CONFIG = {
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw0I2_gFe5IyzbUeMToKWXdGCiZm04Wr0iDzyqD9Yf4CQ-jun4ZJjuFpxzSrBh1TKrqaA/exec", 
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbw0I2_gFe5IyzbUeMToKWXdGCiZm04Wr0iDzyqD9Yf4CQ-jun4ZJjuFpxzSrBh1TKrqaA/exec",
             CLOUD_NAME: "dlajbw9jc",
             UPLOAD_PRESET: "pccc_anh"
         };
@@ -148,6 +654,14 @@
 
         let html5QrCode = null;
 
+        function showZaloNotify(title, message) {
+            const sim = document.getElementById('zalo-simulator');
+            document.getElementById('zalo-title').innerText = title;
+            document.getElementById('zalo-body').innerText = message;
+            sim.classList.add('show');
+            setTimeout(() => sim.classList.remove('show'), 6000);
+        }
+
         function showToast(message, type = 'info') {
             dom.toast.textContent = message; dom.toast.className = type; dom.toast.style.display = 'block';
             setTimeout(() => dom.toast.style.display = 'none', 3000);
@@ -161,19 +675,21 @@
             html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
                 (text) => {
                     stopScanner();
-                    try { let id = text.includes('?id=') ? new URL(text).searchParams.get('id') : text; if(id) setMaTB(id.trim().toUpperCase()); } 
-                    catch(e){ showToast('Mã QR sai!', 'error'); }
-                }, (err) => {}
+                    try { let id = text.includes('?id=') ? new URL(text).searchParams.get('id') : text; if (id) setMaTB(id.trim().toUpperCase()); }
+                    catch (e) { showToast('Mã QR sai!', 'error'); }
+                }, (err) => { }
             ).catch(err => { showToast('Lỗi Camera', 'error'); dom.qrReader.style.display = 'none'; });
         }
 
         function stopScanner() {
-            if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => dom.qrReader.style.display='none'); } 
-            else dom.qrReader.style.display='none';
+            if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop().then(() => dom.qrReader.style.display = 'none'); }
+            else dom.qrReader.style.display = 'none';
         }
 
         function setMaTB(value) {
             dom.maTB_Badge.textContent = value; dom.maTB_Hidden.value = value;
+            const badge = document.getElementById('st-ma');
+            if (value) { badge.textContent = "ĐÃ CHỌN"; badge.className = "status-badge-live ok"; }
         }
 
         let lookupTimer;
@@ -181,39 +697,56 @@
             clearTimeout(lookupTimer);
             lookupTimer = setTimeout(async () => {
                 const ma = dom.maNV.value.trim().toUpperCase();
-                if(ma.length < 3) { dom.tenNV_Display.style.display='none'; return; }
+                const badge = document.getElementById('st-nv');
+                if (ma.length < 3) { dom.tenNV_Display.style.display = 'none'; badge.textContent = ""; return; }
                 try {
                     const res = await fetch(CONFIG.SCRIPT_URL + '?action=getEmployee&maNV=' + encodeURIComponent(ma));
                     const data = await res.json();
-                    if(data.status === 'success') {
+                    if (data.status === 'success') {
                         dom.tenNV_Display.textContent = `👤 ${data.name}`; dom.tenNV_Display.className = 'employee-info success'; dom.tenNV_Display.style.display = 'block';
+                        badge.textContent = "HỢP LỆ"; badge.className = "status-badge-live ok";
                     } else {
                         dom.tenNV_Display.textContent = '❌ Sai mã NV'; dom.tenNV_Display.className = 'employee-info error'; dom.tenNV_Display.style.display = 'block';
+                        badge.textContent = "SAI MÃ"; badge.className = "status-badge-live err";
                     }
-                } catch(e){}
+                } catch (e) { }
             }, 600);
         });
 
         function toggleGhiChu() {
-            const err = document.querySelector('input[name="ngoaiQuan"]:checked').value==='Lỗi' || document.querySelector('input[name="apSuat"]:checked').value==='Lỗi' || document.querySelector('input[name="hanSD"]:checked').value==='Hết hạn';
-            dom.ghiChuBox.style.display = err ? 'block' : 'none';
+            const nq = document.querySelector('input[name="ngoaiQuan"]:checked').value;
+            const as = document.querySelector('input[name="apSuat"]:checked').value;
+            const hs = document.querySelector('input[name="hanSD"]:checked').value;
+            const isErr = nq === 'Lỗi' || as === 'Lỗi' || hs === 'Hết hạn';
+
+            const badge = document.getElementById('st-device');
+            if (isErr) {
+                badge.textContent = "CÓ LỖI"; badge.className = "status-badge-live err";
+            } else {
+                badge.textContent = "TỐT"; badge.className = "status-badge-live ok";
+            }
+            dom.ghiChuBox.style.display = isErr ? 'block' : 'none';
         }
         document.querySelectorAll('input[type="radio"]').forEach(r => r.addEventListener('change', toggleGhiChu));
 
         dom.anhChup.addEventListener('change', e => {
             const file = e.target.files[0];
-            if(file) {
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = e => { dom.previewAnh.src = e.target.result; dom.previewBox.style.display='block'; dom.labelUpload.style.display='none'; };
+                reader.onload = e => { dom.previewAnh.src = e.target.result; dom.previewBox.style.display = 'block'; dom.labelUpload.style.display = 'none'; };
                 reader.readAsDataURL(file);
             }
         });
-        dom.removeImageBtn.addEventListener('click', () => { dom.anhChup.value=''; dom.previewBox.style.display='none'; dom.labelUpload.style.display='block'; });
+        dom.removeImageBtn.addEventListener('click', () => { dom.anhChup.value = ''; dom.previewBox.style.display = 'none'; dom.labelUpload.style.display = 'block'; });
 
         dom.btnSubmit.addEventListener('click', async () => {
-            if(!dom.maTB_Hidden.value) return showToast('Chưa có mã thiết bị', 'error');
-            if(!dom.maNV.value) return showToast('Chưa nhập mã NV', 'error');
-            if(!dom.anhChup.files[0]) return showToast('Chưa chụp ảnh!', 'error');
+            if (!dom.maTB_Hidden.value) return showToast('Chưa có mã thiết bị', 'error');
+            if (!dom.maNV.value) return showToast('Chưa nhập mã NV', 'error');
+            if (!dom.anhChup.files[0]) return showToast('Chưa chụp ảnh!', 'error');
+
+            const isErr = document.querySelector('input[name="ngoaiQuan"]:checked').value === 'Lỗi' ||
+                document.querySelector('input[name="apSuat"]:checked').value === 'Lỗi' ||
+                document.querySelector('input[name="hanSD"]:checked').value === 'Hết hạn';
 
             dom.btnSubmit.disabled = true; showLoading('Nén ảnh...');
             try {
@@ -223,7 +756,7 @@
                     reader.onload = e => {
                         const img = new Image(); img.src = e.target.result;
                         img.onload = () => {
-                            const canvas = document.createElement('canvas'); const scale = Math.min(1000/img.width, 1);
+                            const canvas = document.createElement('canvas'); const scale = Math.min(1000 / img.width, 1);
                             canvas.width = img.width * scale; canvas.height = img.height * scale;
                             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                             resolve(canvas.toDataURL('image/jpeg', 0.8));
@@ -246,37 +779,45 @@
                 };
                 const res = await fetch(CONFIG.SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const data = await res.json();
-                if(data.status === 'success') {
+                if (data.status === 'success') {
                     localStorage.setItem('savedMaNV', payload.maNV);
+
+                    // Trigger Zalo Notification Simulation
+                    if (isErr) {
+                        showZaloNotify("⚠️ BÁO CÁO SỰ CỐ PCCC", `Nhân viên ${dom.maNV.value} vừa báo cáo lỗi tại thiết bị ${payload.maTB}. Hệ thống sẽ sớm xử lý!`);
+                    } else {
+                        showZaloNotify("✅ KIỂM TRA ĐẠT", `Thiết bị ${payload.maTB} đã được kiểm tra bởi ${dom.maNV.value}. Trạng thái: TỐT.`);
+                    }
+
                     showToast('✅ Thành công!', 'success');
                     setTimeout(() => window.location.href = window.location.pathname, 2000);
                 } else throw new Error(data.message);
-            } catch(e) { showToast('Lỗi: ' + e.message, 'error'); dom.btnSubmit.disabled = false; }
+            } catch (e) { showToast('Lỗi: ' + e.message, 'error'); dom.btnSubmit.disabled = false; }
             finally { hideLoading(); }
         });
 
-        dom.btnScanner.addEventListener('click', () => dom.qrReader.style.display==='block' ? stopScanner() : startScanner());
+        dom.btnScanner.addEventListener('click', () => dom.qrReader.style.display === 'block' ? stopScanner() : startScanner());
         dom.closeScannerBtn.addEventListener('click', stopScanner);
-        dom.showManualBtn.addEventListener('click', () => dom.manualInputContainer.style.display='block');
-        dom.cancelManualBtn.addEventListener('click', () => dom.manualInputContainer.style.display='none');
-        
+        dom.showManualBtn.addEventListener('click', () => dom.manualInputContainer.style.display = 'block');
+        dom.cancelManualBtn.addEventListener('click', () => dom.manualInputContainer.style.display = 'none');
+
         dom.applyManualBtn.addEventListener('click', async () => {
             const ma = dom.manualMaTB.value.toUpperCase();
             const code = document.getElementById('manualCode').value;
-            if(code !== "1111") return showToast("Sai mã xác thực hỏng!", "error");
-            
+            if (code !== "1111") return showToast("Sai mã xác thực hỏng!", "error");
+
             showLoading("Báo lỗi QR...");
             await fetch(CONFIG.SCRIPT_URL + '?action=reportBrokenQR&id=' + ma);
             hideLoading();
-            setMaTB(ma); dom.manualInputContainer.style.display='none';
+            setMaTB(ma); dom.manualInputContainer.style.display = 'none';
+            showZaloNotify("⚠️ QR CODE HỎNG", `Phát hiện mã QR tại vị trí ${ma} bị hỏng. Đã ghi nhận để cấp lại!`);
         });
 
         const saved = localStorage.getItem('savedMaNV');
-        if(saved) { dom.maNV.value = saved; dom.maNV.dispatchEvent(new Event('input')); }
+        if (saved) { dom.maNV.value = saved; dom.maNV.dispatchEvent(new Event('input')); }
         const id = new URLSearchParams(window.location.search).get('id');
-        if(id) setMaTB(id.toUpperCase());
+        if (id) setMaTB(id.toUpperCase());
     </script>
 </body>
 
 </html>
-
